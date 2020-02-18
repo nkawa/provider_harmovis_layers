@@ -4,7 +4,7 @@
   "description": "Harmoware-VIS Layers Synerex provider",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --port 10080 --mode development",
+    "start": "webpack-dev-server --port 10050 --mode development",
     "dev": "webpack --mode development",
     "watch": "webpack --watch",
     "build": "webpack --mode production"
@@ -18,11 +18,14 @@
   "dependencies": {
     "@babel/core": "^7.6.4",
     "@babel/preset-react": "^7.6.3",
+    "@deck.gl/geo-layers": "^8.0.15",
     "@deck.gl/layers": "7.3.12",
     "@deck.gl/react": "7.3.12",
     "@types/jest": "24.0.18",
     "@types/mapbox-gl": "1.6.3",
     "@types/node": "12.7.8",
+    "@types/sharedworker": "^0.0.29",
+    "@types/socket.io-client": "^1.4.32",
     "babel-loader": "^8.0.6",
     "bootstrap": "^4.4.1",
     "css-loader": "^3.2.0",

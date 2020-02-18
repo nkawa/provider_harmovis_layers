@@ -1,6 +1,10 @@
-  
-declare module "deck.gl" {
+declare module "@deck.gl/geo-layers" {
+  import { Layer } from '@deck.gl/core';
+  class Tile3DLayers<P, S = {}> extends Layer<P, S> {}
+}
 
+declare module "deck.gl" {
+  
   import * as React from 'react';
   import { Layer } from '@deck.gl/core';
   import { vec3 } from 'gl-matrix';
@@ -38,6 +42,22 @@ declare module "deck.gl" {
     getPosition: (d: any) => number[],
   }
 
+  interface ColumnLayerProps extends LayerProps {
+    diskResolution?: number; 
+    angle?: number;
+    vertics?: [];
+    offset?: 0;
+    coverage?: number;
+    elevationScale?: number;
+    filled?: boolean;
+    wireframe?: boolean;
+    lineWidthUnits?: 'meters'|'pixels';
+    getPosition?: (d: any) => (number|undefined)[],
+    getFillColor?: (d: any) => (number|undefined)[],
+    getElevation?: (d: any) => number|undefined,
+    getLineWidth?: (d: any) => (number|undefined)[],
+  }
+
   export default class DeckGL extends React.Component<any> {}
 
   class CompositeLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
@@ -50,6 +70,7 @@ declare module "deck.gl" {
 
   class HexagonLayer<P extends HexagonLayerProps, S = {}> extends Layer<P, S> {}
   class GridLayer<P extends HexagonLayerProps, S = {}> extends Layer<P, S> {}
+  class ColumnLayer<P extends ColumnLayerProps, S = {}> extends Layer<P, S> {}
 
   class ArcLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
 

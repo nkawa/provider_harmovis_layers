@@ -140,48 +140,13 @@ export default class Controller extends React.Component<ControllerProps, ContSta
   render () {
     const { settime, timeBegin, leading, timeLength, actions,
       secperhour, animatePause, animateReverse,
-      getMoveDataChecked, getMoveOptionChecked, getDepotOptionChecked,
-      getOptionChangeChecked, inputFileName, viewport } = this.props
-
-    const { currentGroupindex, routeGroupDisplay, saveRouteGroup } = this.state
-    const displayIndex = saveRouteGroup.length ? currentGroupindex + 1 : 0
-    const { depotsFileName } = inputFileName
+      inputFileName } = this.props
 
     return (
       <div className='harmovis_controller'>
         <div className='container'>
           <ul className='list-group'>
-            <li>
-              <div className='form-check'>
-                <input type='checkbox' id='MoveDataChecked' onChange={getMoveDataChecked} className='form-check-input' defaultChecked={true} />
-                <label htmlFor='MoveDataChecked' className='form-check-label'>運行データ表示</label>
-              </div>
-            </li>
-            <li>
-              <div className='form-check'>
-                <input type='checkbox' id='MoveOptionChecked' onChange={getMoveOptionChecked} className='form-check-input' />
-                <label htmlFor='MoveOptionChecked' className='form-check-label'>運行データオプション表示</label>
-              </div>
-            </li>
-            <li>
-              <div className='form-check'>
-                <input type='checkbox' id='DepotOptionChecked' onChange={getDepotOptionChecked} className='form-check-input' />
-                <label htmlFor='DepotOptionChecked' className='form-check-label'>停留所データオプション表示</label>
-              </div>
-            </li>
-            <li>
-              <div className='form-check'>
-                <input type='checkbox' id='OptionChangeChecked' onChange={getOptionChangeChecked} className='form-check-input' />
-                <label htmlFor='OptionChangeChecked' className='form-check-label'>オプション表示パターン切替</label>
-              </div>
-            </li>
-            <li><span>ナビゲーションパネル</span>
-              <div className='btn-group d-flex' role='group'>
-                <NavigationButton buttonType='zoom-in' actions={actions} viewport={viewport} className='btn btn-outline-light btn-sm w-100' />
-                <NavigationButton buttonType='zoom-out' actions={actions} viewport={viewport} className='btn btn-outline-light btn-sm w-100' />
-                <NavigationButton buttonType='compass' actions={actions} viewport={viewport} className='btn btn-outline-light btn-sm w-100' />
-              </div>
-            </li>
+
             <li><span>コントロールパネル</span>
               <div className='btn-group d-flex' role='group'>
                 {animatePause ?
@@ -241,9 +206,42 @@ export default class Controller extends React.Component<ControllerProps, ContSta
               </li>
               </ol>
             </figure>
-
         </div>
       </div>
     )
   }
 }
+
+/**
+ *             <li>
+              <div className='form-check'>
+                <input type='checkbox' id='MoveDataChecked' onChange={getMoveDataChecked} className='form-check-input' defaultChecked={true} />
+                <label htmlFor='MoveDataChecked' className='form-check-label'>運行データ表示</label>
+              </div>
+            </li>
+            <li>
+              <div className='form-check'>
+                <input type='checkbox' id='MoveOptionChecked' onChange={getMoveOptionChecked} className='form-check-input' />
+                <label htmlFor='MoveOptionChecked' className='form-check-label'>運行データオプション表示</label>
+              </div>
+            </li>
+            <li>
+              <div className='form-check'>
+                <input type='checkbox' id='DepotOptionChecked' onChange={getDepotOptionChecked} className='form-check-input' />
+                <label htmlFor='DepotOptionChecked' className='form-check-label'>停留所データオプション表示</label>
+              </div>
+            </li>
+            <li>
+              <div className='form-check'>
+                <input type='checkbox' id='OptionChangeChecked' onChange={getOptionChangeChecked} className='form-check-input' />
+                <label htmlFor='OptionChangeChecked' className='form-check-label'>オプション表示パターン切替</label>
+              </div>
+            </li>
+            <li><span>ナビゲーションパネル</span>
+              <div className='btn-group d-flex' role='group'>
+                <NavigationButton buttonType='zoom-in' actions={actions} viewport={viewport} className='btn btn-outline-light btn-sm w-100' />
+                <NavigationButton buttonType='zoom-out' actions={actions} viewport={viewport} className='btn btn-outline-light btn-sm w-100' />
+                <NavigationButton buttonType='compass' actions={actions} viewport={viewport} className='btn btn-outline-light btn-sm w-100' />
+              </div>
+            </li>
+ */

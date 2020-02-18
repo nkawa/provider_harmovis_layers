@@ -3,31 +3,37 @@ import {
 	Container, connectToHarmowareVis, HarmoVisLayers, MovesLayer, MovesInput,
 	LoadingIcon, FpsDisplay, DepotsLayer, EventInfo, MovesbaseOperation, MovesBase, BasedProps
 } from 'harmoware-vis'
-
 import HeatmapLayer from './HeatmapLayer'
-// import './App.scss';
-
-// import { StaticMap,  } from 'react-map-gl';
-import { Layer } from '@deck.gl/core'
 import DeckGL from '@deck.gl/react'
 import {GeoJsonLayer, LineLayer} from '@deck.gl/layers'
-
 import {_MapContext as MapContext, InteractiveMap, NavigationControl} from 'react-map-gl'
-
 import Controller from '../components/controller'
-
-import * as io from 'socket.io-client'
-
-const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN // Acquire Mapbox accesstoken
+import { SocketMsgTypes } from '../constants/workerMessageTypes'
+import BarLayer from './BarLayer'
+import { GridType } from '../constants/MapSettings'
 
 class App extends Container {
 	constructor (props) {
 		super(props)
 		const { setSecPerHour, setLeading, setTrailing } = props.actions
+		const worker = new Worker('socketWorker.js');
+		const self = this;
+		worker.onmessage = e => {
+			const type = e.data[0];
+			if(type === SocketMsgTypes.NOTIFY_MAPBOX_TOKEN) {
+				console.log(e.data);
+				this.setState({
+					mapbox_token: e.data[1]
+				});
+			} else if (type === SocketMsgTypes.CONNECTED) {
+				console.log('connected')
+			} else if (type === SocketMsgTypes.AGENT) {
+				self.getAgents(e.data[1])
+			}
+		};
 		setSecPerHour(3600)
 		setLeading(3)
 		setTrailing(3)
-		const socket = io()
 		this.state = {
 			moveDataVisible: true,
 			moveOptionVisible: false,
@@ -53,19 +59,7 @@ class App extends Container {
 		this._onViewStateChange = this._onViewStateChange.bind(this)
 
 		// for receiving event info.
-		socket.on('connect', () => { console.log('Socket.IO connected!') })
-		socket.on('event', this.getEvent.bind(this))
-		socket.on('geojson', this.getGeoJson.bind(this))
-		socket.on('lines', this.getLines.bind(this))
-		socket.on('agents', this.getAgents.bind(this))
-		socket.on('viewstate', this.getViewState.bind(this))
 
-		socket.on('mapbox_token', (token) => {
-			console.log('Token Got:' + token)
-			this.setState({ mapbox_token: token })
-		})
-
-		socket.on('disconnect', () => { console.log('Socket.IO disconnected!') })
 	}
 
 	bin2String (array) {
@@ -108,11 +102,10 @@ class App extends Container {
 		}
 	}
 
-	getAgents (data) {
+	getAgents (dt) {
 		const { actions, movesbase } = this.props
 // 		console.log(data)
 // 		console.log('DT')
-		const dt = JSON.parse(data)
 		const agents = dt.dt.agents
 // 		console.log(dt)
 // 		console.log(agents)
@@ -135,7 +128,14 @@ class App extends Container {
 						position: [agents[i].point[0], agents[i].point[1], 0],
 						angle: 0,
 						speed: 0.5,
-						color: [100,100,0]
+						barType: 10/2 ? 'BT_BOX_FIXCOLOR' : 'BT_HEX_FIXCOLOR ',
+						color: [255, 0, 0],
+						value: 100,
+						radius: 500,
+						width: 250,
+						min: 10,
+						max: 200,
+						text: 100,
 					}]
 				})
 			}
@@ -149,8 +149,15 @@ class App extends Container {
 					elapsedtime: time,
 					position: [agents[i].point[0], agents[i].point[1], 0],
 					angle: 0,
-					color: [100,100,0],
-					speed: 0.5
+					speed: 0.5,
+					barType: 10/2 ? 'BT_BOX_FIXCOLOR' : 'BT_HEX_FIXCOLOR ',
+					color: [255, 0, 0],
+					value: 10,
+					radius: 50,
+					width: 250,
+					min: 10,
+					max: 200,
+					text: 100,
 				})
 // 				setMovesbase.push(movesbase[i]);
 			}
@@ -164,7 +171,22 @@ class App extends Container {
 		const { actions, movesbase } = this.props
 		const { mtype, id, lat, lon, angle, speed } = JSON.parse(socketData)
 		// 	console.log("dt:",mtype,id,time,lat,lon,angle,speed, socketData);
+		
 		const time = Date.now() / 1000 // set time as now. (If data have time, ..)
+		const newData = {
+			id: (Math.random() * 9999).toString(),
+			elapsedtime: time,
+			position: [lon, lat, 0],
+			angle, speed,
+			barType: id/2 ? 'BT_BOX_FIXCOLOR' : 'BT_HEX_FIXCOLOR ',
+			color: [255, 0, 0],
+			value: 100,
+			radius: 500,
+			width: 250,
+			min: 10,
+			max: 200,
+			text: 100,
+		}
 		let hit = false
 		const movesbasedata = [...movesbase] // why copy !?
 		const setMovesbase = []
@@ -177,11 +199,7 @@ class App extends Container {
 				// 		const {operation } = setMovedata;
 				// 		const arrivaltime = time;
 				setMovedata.arrivaltime = time
-				setMovedata.operation.push({
-					elapsedtime: time,
-					position: [lon, lat, 0],
-					angle, speed
-				})
+				setMovedata.operation.push(newData)
 				// 		setMovedata = Object.assign({}, setMovedata, {arrivaltime, operation});
 			}
 			setMovesbase.push(setMovedata)
@@ -191,11 +209,7 @@ class App extends Container {
 				mtype, id,
 				departuretime: time,
 				arrivaltime: time,
-				operation: [{
-					elapsedtime: time,
-					position: [lon, lat, 0],
-					angle, speed
-				}]
+				operation: [newData]
 			})
 		}
 		actions.updateMovesBase(setMovesbase)
@@ -286,8 +300,6 @@ class App extends Container {
 		const props = this.props
 		const { actions, clickedObject, inputFileName, viewport, deoptsData, loading,
 			routePaths, lightSettings, movesbase, movedData, mapStyle ,extruded, gridSize,gridHeight, enabledHeatmap, selectedType} = props
-		// 	const { movesFileName } = inputFileName;
-		const optionVisible = false
 		const onHover = (el) => {
 			if (el && el.object) {
 				let disptext = ''
@@ -304,6 +316,11 @@ class App extends Container {
 		}
 		let layers = []
 
+		layers.push(new BarLayer({
+			id: 'bar-layer',
+			gridType: GridType.Hexagon,
+			data: movedData,
+		}))
 		if (this.state.geojson != null) {
 			layers.push(
 			new GeoJsonLayer({
@@ -316,65 +333,11 @@ class App extends Container {
 				lineWidthScale: 2,
 				lineWidthMinPixels: 2,
 				getFillColor: [160, 160, 180, 200],
-// 				getLineColor: d => colorToRGBArray(d.properties.color),
 				getLineColor: [255,255,255],
 				getRadius: 1,
 				getLineWidth: 1,
 				getElevation: 10
-// 				onHover: ({object, x, y}) => {
-// 				  const tooltip = object.properties.name || object.properties.station;
-// 				}
 			}))
-		}
-
-		if (this.state.lines.length > 0) {
-			this.lines = 0
-			layers.push(
-				new LineLayer({
-					visible: true,
-					data: this.state.lines,
-					getSourcePosition: d => d.from,
-					getTargetPosition: d => d.to,
-					getColor: this.state.linecolor,
-					getWidth: 1.0,
-					widthMinPixels: 0.5
-				})
-			)
-
-		}
-
-		if (this.state.moveDataVisible && movedData.length > 0) {
-			layers.push(
-				new MovesLayer({
-					viewport, routePaths, movesbase, movedData,
-					clickedObject, actions, lightSettings,
-					visible: this.state.moveDataVisible,
-					optionVisible: this.state.moveOptionVisible,
-					layerRadiusScale: 0.03,
-					layerOpacity: 0.8,
-					getRaduis: 0.2,
-					getStrokeWidth: 0.1,
-					getColor : [0,200,20],
-					optionCellSize: 2,
-					sizeScale: 20,
-					iconChange: false,
-					optionChange: false, // this.state.optionChange,
-					onHover
-				})
-			)
-		}
-
-		if (enabledHeatmap) {
-			layers.push(
-				new HeatmapLayer({
-					visible: enabledHeatmap,
-					type: selectedType,
-					extruded,
-					movedData,
-					size: gridSize,
-					height: gridHeight
-				  })
-			)
 		}
 
 		const onViewportChange = this.props.onViewportChange || actions.setViewport
@@ -387,43 +350,21 @@ class App extends Container {
 			onViewportChange={onViewportChange}
 			mapboxApiAccessToken={this.state.mapbox_token}
 			visible={true}
-// 			onStyleLoad={this.handleStyleLoad}
 			>
 		</InteractiveMap>
 
 		// wait until mapbox_token is given from harmo-vis provider.
 		const visLayer =
 			(this.state.mapbox_token.length > 0) ?
-				<DeckGL
-					viewState = {viewState}
+				<HarmoVisLayers 
+					visible={true}
+					viewport={viewport}
+					mapboxApiAccessToken={this.state.mapbox_token}
+					actions={actions}
 					layers={layers}
-					onWebGLInitialized={this.initialize}
-					initialViewState={{longitude: 136.8163486 , latitude: 34.8592285, zoom: 17}}
-					controller={true}
-					ContextProvider={MapContext.Provider}
-					onViewStateChange={this._onViewStateChange}
-				>
-					{mapboxMap}
-				</DeckGL>
+				/>
 				: <LoadingIcon loading={true} />
 
-/*					<div style={{ position: "absolute", left: 30, top: 120, zIndex: 1 }}>
-						<NavigationControl />
-					</div>
-				*/
-
-			/*				<InteractiveMap
-					viewport={viewport}
-					mapStyle={'mapbox://styles/mapbox/dark-v8'}
-					onViewportChange={onViewportChange}
-					mapboxApiAccessToken={this.state.mapbox_token}
-					visible={true}>
-
-					<DeckGL viewState={viewport} layers={layers} onWebGLInitialized={this.initialize} />
-
-				</InteractiveMap>
-				: <LoadingIcon loading={true} />;
-*/
 		return (
 			<div>
 				<Controller {...props}
@@ -454,3 +395,76 @@ class App extends Container {
 	}
 }
 export default connectToHarmowareVis(App)
+
+		/*
+		if (this.state.lines.length > 0) {
+			this.lines = 0
+			layers.push(
+				new LineLayer({
+					visible: true,
+					data: this.state.lines,
+					getSourcePosition: d => d.from,
+					getTargetPosition: d => d.to,
+					getColor: this.state.linecolor,
+					getWidth: 1.0,
+					widthMinPixels: 0.5
+				})
+			)
+
+		}
+		*/
+
+		/*
+		if (this.state.moveDataVisible && movedData.length > 0) {
+			layers.push(
+				new MovesLayer({
+					viewport, routePaths, movesbase, movedData,
+					clickedObject, actions, lightSettings,
+					visible: this.state.moveDataVisible,
+					optionVisible: this.state.moveOptionVisible,
+					layerRadiusScale: 0.03,
+					layerOpacity: 0.8,
+					getRaduis: 0.2,
+					getStrokeWidth: 0.1,
+					getColor : [0,200,20],
+					optionCellSize: 2,
+					sizeScale: 20,
+					iconChange: false,
+					optionChange: false, // this.state.optionChange,
+					onHover
+				})
+			)
+		}
+		
+
+		if (enabledHeatmap) {
+			layers.push(
+				new HeatmapLayer({
+					visible: enabledHeatmap,
+					type: selectedType,
+					extruded,
+					movedData,
+					size: gridSize,
+					height: gridHeight
+				  })
+			)
+		}
+		*/
+
+/*					<div style={{ position: "absolute", left: 30, top: 120, zIndex: 1 }}>
+						<NavigationControl />
+					</div>
+				*/
+
+			/*				<InteractiveMap
+					viewport={viewport}
+					mapStyle={'mapbox://styles/mapbox/dark-v8'}
+					onViewportChange={onViewportChange}
+					mapboxApiAccessToken={this.state.mapbox_token}
+					visible={true}>
+
+					<DeckGL viewState={viewport} layers={layers} onWebGLInitialized={this.initialize} />
+
+				</InteractiveMap>
+				: <LoadingIcon loading={true} />;
+*/
