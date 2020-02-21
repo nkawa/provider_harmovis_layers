@@ -74,6 +74,8 @@ github.com/synerex/proto_geography v0.0.7 h1:4lxWv0f5Z/Q2YX8Yxb3+efc+VneOFo54Sl5
 github.com/synerex/proto_geography v0.0.7/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
 github.com/synerex/proto_geography v0.0.8 h1:3vp9uyBTNAFx0BzyokUL9arpF15VUsBLC/NSIHkwcxc=
 github.com/synerex/proto_geography v0.0.8/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
+github.com/synerex/proto_geography v0.1.0 h1:9ZO6CeMIAGuhD49hY6f5BSoAOaa3IJluS6QXpbo+DoI=
+github.com/synerex/proto_geography v0.1.0/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
 github.com/synerex/proto_people_agent v0.0.1 h1:l4zdTmSt1hvD2gLL5Af0XGjAZJnk47+1CNZ+yp5grWE=
 github.com/synerex/proto_people_agent v0.0.1/go.mod h1:Vp5ZMm89p0LCtziu5mpNdfJA+NbeM3fXhOSoJPIfU+Y=
 github.com/synerex/synerex_api v0.2.1 h1:2OTBiOBUjCYtjO4KzTPq1szU4oJDCgKVovcG1a/4TTw=
@@ -110,6 +112,8 @@ golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 h1:efeOvDhwQ29Dj3SdAV/MJf8ou
 golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
 golang.org/x/net v0.0.0-20200202094626-16171245cfb2 h1:CCH4IOTTfewWjGOlSp+zGcjutRKlBEZQ6wTn8ozI/nI=
 golang.org/x/net v0.0.0-20200202094626-16171245cfb2/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
+golang.org/x/net v0.0.0-20200219183655-46282727080f h1:dB42wwhNuwPvh8f+5zZWNcU+F2Xs/B9wXXwvUCOH7r8=
+golang.org/x/net v0.0.0-20200219183655-46282727080f/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20181108010431-42b317875d0f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
@@ -124,6 +128,8 @@ golang.org/x/sys v0.0.0-20191228213918-04cbcbbfeed8 h1:JA8d3MPx/IToSyXZG/RhwYEtf
 golang.org/x/sys v0.0.0-20191228213918-04cbcbbfeed8/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200217220822-9197077df867 h1:JoRuNIf+rpHl+VhScRQQvzbHed86tKkqwPMV34T8myw=
 golang.org/x/sys v0.0.0-20200217220822-9197077df867/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20200219091948-cb0a6d8edb6c h1:jceGD5YNJGgGMkJz79agzOln1K9TaZUjv5ird16qniQ=
+golang.org/x/sys v0.0.0-20200219091948-cb0a6d8edb6c/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.2 h1:tW2bmiBqwgJj/UpqtC8EpXEZVYOwU0yG4iWbprSVAcs=
 golang.org/x/text v0.3.2/go.mod h1:bEr9sfX3Q8Zfm5fL9x+3itogRgK3+ptLWKqgva+5dAk=
@@ -143,6 +149,8 @@ google.golang.org/genproto v0.0.0-20191223191004-3caeed10a8bf h1:1x8rC5/IgdLMPbP
 google.golang.org/genproto v0.0.0-20191223191004-3caeed10a8bf/go.mod h1:n3cpQtvxv34hfy77yVDNjmbRyujviMdxYliBSkLhpCc=
 google.golang.org/genproto v0.0.0-20200212174721-66ed5ce911ce h1:1mbrb1tUU+Zmt5C94IGKADBTJZjZXAd+BubWi7r9EiI=
 google.golang.org/genproto v0.0.0-20200212174721-66ed5ce911ce/go.mod h1:55QSHmfGQM9UVYDPBsyGGes0y52j32PQ3BqQfXhyH3c=
+google.golang.org/genproto v0.0.0-20200218151345-dad8c97a84f5 h1:jB9+PJSvu5tBfmJHy/OVapFdjDF3WvpkqRhxqrmzoEU=
+google.golang.org/genproto v0.0.0-20200218151345-dad8c97a84f5/go.mod h1:55QSHmfGQM9UVYDPBsyGGes0y52j32PQ3BqQfXhyH3c=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.23.0/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
 google.golang.org/grpc v1.23.1/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=

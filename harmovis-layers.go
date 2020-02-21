@@ -6,17 +6,14 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"math"
 	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"sync"
 	"time"
-	"math/rand"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	gosocketio "github.com/mtfelian/golang-socketio"
 	"github.com/mtfelian/golang-socketio/transport"
 	fleet "github.com/synerex/proto_fleet"
@@ -150,34 +147,6 @@ func run_server() *gosocketio.Server {
 		}
 		c.Emit("mapbox_token", mapboxToken)
 	})
-	server.On("get_supply", func(c *gosocketio.Channel) {
-		bars := []*geo.BarGraph{}
-		for 0; i < 10; i++ {
-			bars := append(bars, &geo.BarGraph{
-				Id: i,
-				Ts: &timestamp.Timestamp{
-					Seconds: time.Now().Unix(),
-				},
-				Color: rand.Int31n(0xFFFF),
-				Lon: 136.8163486 + rand.NormFloat64() * 0.7,
-				Lat: 34.8592285 + rand.NormFloat64() * 0.7,
-				Width: 300,
-				Value: rand.NormFloat64() * 2000,
-				Min: 100,
-				Max: 1500,
-				Text: "hoge hoge",
-			})
-		}
-		barGraphs := geo.BarGraphs{
-			Bars: []*geo.BarGraph{
-				&*geo.BarGraph{
-					Id: 
-				},
-			},
-		}
-		
-		c.Emit("mapbox_token", barGraphs)
-	})
 	server.On(gosocketio.OnDisconnection, func(c *gosocketio.Channel) {
 		log.Printf("Disconnected from %s as %s", c.IP(), c.Id())
 	})
@@ -287,7 +256,17 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 			ioserv.BroadcastToAll("viewstate", string(jsonBytes))
 			mu.Unlock()
 		}
-
+	case "BarGraphs":
+		vs := &geo.BarGraphs{}
+		err := proto.Unmarshal(sp.Cdata.Entity, vs)
+		if err == nil {
+			jsonBytes, _ := json.Marshal(vs)
+			jsonStr := string(jsonBytes)
+			log.Printf("BarGraphs: %v", jsonStr)
+			mu.Lock()
+			ioserv.BroadcastToAll("bargraphs", jsonStr)
+			mu.Unlock()
+		}
 	}
 
 }

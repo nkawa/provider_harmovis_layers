@@ -8,5 +8,6 @@ export interface SocketMessage<T> extends WorkerMessage {
 export enum SocketMsgTypes {
     AGENT='AGENET',
     CONNECTED='CONNECTED',
-    NOTIFY_MAPBOX_TOKEN='NOTIFY_MAPBOX_TOKEN'
+    NOTIFY_MAPBOX_TOKEN='NOTIFY_MAPBOX_TOKEN',
+    RECIVED_BAR_GRAPHS='RECIVED_BAR_GRAPHS'
 }

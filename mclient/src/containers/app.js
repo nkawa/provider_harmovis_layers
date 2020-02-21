@@ -21,14 +21,13 @@ class App extends Container {
 		worker.onmessage = e => {
 			const type = e.data[0];
 			if(type === SocketMsgTypes.NOTIFY_MAPBOX_TOKEN) {
-				console.log(e.data);
 				this.setState({
 					mapbox_token: e.data[1]
 				});
 			} else if (type === SocketMsgTypes.CONNECTED) {
 				console.log('connected')
-			} else if (type === SocketMsgTypes.AGENT) {
-				self.getAgents(e.data[1])
+			} else if (type === SocketMsgTypes.RECIVED_BAR_GRAPHS) {
+				self.getBargraph(e.data[1])
 			}
 		};
 		setSecPerHour(3600)
@@ -102,68 +101,59 @@ class App extends Container {
 		}
 	}
 
-	getAgents (dt) {
+	getBargraph (data) {
 		const { actions, movesbase } = this.props
-// 		console.log(data)
-// 		console.log('DT')
-		const agents = dt.dt.agents
-// 		console.log(dt)
-// 		console.log(agents)
+		const bars = data.bars
+		const getData = i => {
+			const bar = bars[i]
+			console.log(bar)
+			const time = bar.ts.seconds
+			return {
+				elapsedtime: time,
+				position: [bar.lon, bar.lat, 0],
+				angle: 0,
+				speed: 0,
+				barType: bar.type,
+				data: bar.barData.map(b => {
+					const color = b.color;
+					return {
+						value: b.value,
+						color: [
+							((color & 0xFF0000) >> 16),
+							((color & 0x00FF00) >> 8),
+							(color & 0x0000FF)
+						],
+						label: b.label,
+					}
+				}),
+				radius: bar.radius,
+				width: bar.width,
+				min: bar.min,
+				max: bar.max,
+				text: bar.text,
+			}
+		}
 
-		const time = dt.ts // set time as now. (If data have time, ..)
-// 		let hit = false;
-// 		const movesbasedata = [...movesbase]; // why copy !?
 		let  setMovesbase = []
-
 		if (movesbase.length == 0) {
-// 			console.log("Initial!:" + agents.length)
-			for (let i = 0, len = agents.length; i < len; i++) {
+			for (let i = 0, len = bars.length; i < len; i++) {
+				const barData = getData(i);
 				setMovesbase.push({
 					mtype: 0,
 					id: i,
-					departuretime: time,
-					arrivaltime: time,
-					operation: [{
-						elapsedtime: time,
-						position: [agents[i].point[0], agents[i].point[1], 0],
-						angle: 0,
-						speed: 0.5,
-						barType: 10/2 ? 'BT_BOX_FIXCOLOR' : 'BT_HEX_FIXCOLOR ',
-						color: [255, 0, 0],
-						value: 100,
-						radius: 500,
-						width: 250,
-						min: 10,
-						max: 200,
-						text: 100,
-					}]
+					departuretime: barData.elapsedtime,
+					arrivaltime: barData.elapsedtime,
+					operation: [barData]
 				})
 			}
-// we may refresh viewport
-
 		} else {
-// 			console.log("Aget Update!" + data.length+":"+ agents[0])
 			for (let i = 0, lengthi = movesbase.length; i < lengthi; i ++) {
-				movesbase[i].arrivaltime = time
-				movesbase[i].operation.push({
-					elapsedtime: time,
-					position: [agents[i].point[0], agents[i].point[1], 0],
-					angle: 0,
-					speed: 0.5,
-					barType: 10/2 ? 'BT_BOX_FIXCOLOR' : 'BT_HEX_FIXCOLOR ',
-					color: [255, 0, 0],
-					value: 10,
-					radius: 50,
-					width: 250,
-					min: 10,
-					max: 200,
-					text: 100,
-				})
-// 				setMovesbase.push(movesbase[i]);
+				const barData = getData(i);
+				movesbase[i].arrivaltime = barData.elapsedtime
+				movesbase[i].operation.push(getData(i))
 			}
 			setMovesbase = movesbase
 		}
-
 		actions.updateMovesBase(setMovesbase)
 	}
 
@@ -181,7 +171,7 @@ class App extends Container {
 			barType: id/2 ? 'BT_BOX_FIXCOLOR' : 'BT_HEX_FIXCOLOR ',
 			color: [255, 0, 0],
 			value: 100,
-			radius: 500,
+			radius: 800,
 			width: 250,
 			min: 10,
 			max: 200,
@@ -298,8 +288,7 @@ class App extends Container {
 
 	render () {
 		const props = this.props
-		const { actions, clickedObject, inputFileName, viewport, deoptsData, loading,
-			routePaths, lightSettings, movesbase, movedData, mapStyle ,extruded, gridSize,gridHeight, enabledHeatmap, selectedType} = props
+		const { actions, viewport,  movedData, widthRatio, heightRatio, radiusRatio } = props
 		const onHover = (el) => {
 			if (el && el.object) {
 				let disptext = ''
@@ -320,6 +309,9 @@ class App extends Container {
 			id: 'bar-layer',
 			gridType: GridType.Hexagon,
 			data: movedData,
+			widthRatio,
+			heightRatio,
+			radiusRatio
 		}))
 		if (this.state.geojson != null) {
 			layers.push(

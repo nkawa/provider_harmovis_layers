@@ -42,7 +42,7 @@ declare module "deck.gl" {
     getPosition: (d: any) => number[],
   }
 
-  interface ColumnLayerProps extends LayerProps {
+  interface ColumnLayerProps<D> extends LayerProps {
     diskResolution?: number; 
     angle?: number;
     vertics?: [];
@@ -52,10 +52,10 @@ declare module "deck.gl" {
     filled?: boolean;
     wireframe?: boolean;
     lineWidthUnits?: 'meters'|'pixels';
-    getPosition?: (d: any) => (number|undefined)[],
-    getFillColor?: (d: any) => (number|undefined)[],
-    getElevation?: (d: any) => number|undefined,
-    getLineWidth?: (d: any) => (number|undefined)[],
+    getPosition?: (d: D) => (number|undefined)[],
+    getFillColor?: (d: D) => (number|undefined)[],
+    getElevation?: (d: D) => number|undefined,
+    getLineWidth?: (d: D) => (number|undefined)[],
   }
 
   export default class DeckGL extends React.Component<any> {}

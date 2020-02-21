@@ -32,8 +32,8 @@ socket.on('mapbox_token', (token: string) => {
 })
 
 function startRecivedData() {
-    socket.on('agents', (data: string) => {
-        const dt = JSON.parse(data)
-        worker.postMessage([SocketMsgTypes.AGENT, dt])
+    socket.on('bargraphs', (str: string) => {
+        const data = JSON.parse(str)
+        worker.postMessage([SocketMsgTypes.RECIVED_BAR_GRAPHS, data])
     })
 }

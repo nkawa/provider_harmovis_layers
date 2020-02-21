@@ -1,4 +1,4 @@
-import { LayerProps, CompositeLayer, ColumnLayer, ScatterplotLayer } from 'deck.gl'
+import { LayerProps, CompositeLayer, ColumnLayer, ScatterplotLayer, ColumnLayerProps } from 'deck.gl'
 import { MovedData } from 'harmoware-vis'
 import { GridType } from '../constants/MapSettings';
 import { Layer } from '@deck.gl/core';
@@ -6,16 +6,42 @@ import { Layer } from '@deck.gl/core';
 interface BarLayerProps extends LayerProps {
     gridType: GridType;
     movedData: MovedData[];
+    widthRatio: number;
+    heightRatio: number;
+    radiusRatio: number;
 }
 
 interface BarData extends MovedData {
-    value: number,
+    data: {id: number, color: number[], value: number, label: string}[],
     radius: number,
     width: number,
     min: number,
     max: number,
     text: number,
-    barType: string,
+    barType: number,
+}
+
+const BarType = [
+    "BT_BOX_FIXCOLOR",
+    "BT_BOX_VARCOLOR",
+    "BT_HEX_FIXCOLOR",
+    "BT_HEX_VARCOLOR",
+]
+
+const getColor = (index: number) => {
+    let r = 0x00;
+    let g = 0x00;
+    let b = 0x00;
+    index++;
+    const ratio = Math.floor(index/3);
+    if (index%3 === 0) {
+        b = 0xff - 0x11 * ratio;
+    } else if (index%3 === 1) {
+        b = 0xff - 0x11 * ratio;
+    } else {
+        r = 0xff - 0x11 * ratio;
+    }
+    return [r, g, b]
 }
 
 export default class BarLayer extends CompositeLayer<BarLayerProps> {
@@ -23,35 +49,65 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
   static layerName = 'BarLayer'
 
   renderLayers () {
-    const { data, visible } = this.props
+    const { data, visible, heightRatio, widthRatio, radiusRatio } = this.props
     const barData = data as BarData[];
-    const width = barData[0] && barData[0].width? barData[0].width : 10;
-    const type = barData[0] && barData[0].barType? barData[0].barType : 10;
     const layers = [
         new ScatterplotLayer({
             visible,
             extruded: true,
             opacity: 1,
             data: barData,
-            radiusScale: 20,
+            radiusScale: radiusRatio,
             getRadius: (d: BarData) => d.radius,
             getPosition: (d: BarData) => [d.longitude as number, d.latitude as number],
-            getFillColor: (d: BarData)=> d.color,
+            getFillColor: [0,125,30],
         })
     ] as Layer[];
-    layers.push(
-        new ColumnLayer({
-            id: 'grid-cell-layer',
-            data: barData,
-            extruded: true,
-            diskResolution: type === 'BT_BOX_FIXCOLOR ' ? 4 : 6,
-            radius: width,
-            elevationScale: 100,
-            getPosition: (d: BarData) => [d.longitude, d.latitude],
-            getFillColor: (d: BarData) => d.color as number[],
-            getElevation: (d: BarData) => d.value,
+    const columnDataMap = barData
+        .flatMap( d => {
+            return d.data.map((vdata, index) => {
+                return {
+                    index,
+                    type: d.barType,
+                    width: d.width,
+                    value: vdata.value,
+                    color: vdata.color,
+                    label: vdata.label,
+                    longitude: d.longitude,
+                    latitude: d.latitude,
+                };
+            });
         })
-    );
-    return layers
+        .reduce((prev, data) => {
+            const key = data.index+'_'+data.type+data.width
+            const prevData = prev[key]
+            if (prevData) {
+                prevData.push(data)
+            } else {
+                prev[key] = [data]
+            }
+            return prev
+        }, {} as any)
+    const columnlayers = Object.values(columnDataMap).map((column: any) => {
+        const type = BarType[column[0].type];
+        const width = column[0].width;
+        const index = column[0].index;
+        const isFixColor = type.includes('FIXCOLOR')
+        return new ColumnLayer({
+            id: 'grid-cell-layer-' + index + type +window,
+            data: column,
+            extruded: true,
+            diskResolution: type.includes('HEX') ? 4 : 6,
+            offset: [2.5*index-2.5, 0],
+            radius: width * widthRatio,
+            elevationScale: heightRatio,
+            getPosition: (d: any) => [d.longitude, d.latitude],
+            getFillColor: (d: any) => {
+                isFixColor ? getColor(index) : d.color
+            },
+            getElevation: (d: any) => d.value,
+        });
+    });
+    return layers.concat(columnlayers)
   }
 }

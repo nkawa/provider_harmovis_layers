@@ -6,6 +6,7 @@ import { createStore, applyMiddleware } from 'redux'
 import { Provider } from 'react-redux'
 import App from './containers/app'
 import heatmapSettings from './reducer/heatmapSettings'
+import barGraphSettings from './reducer/barGraphSettings'
 
 import createSagaMiddleware from 'redux-saga'
 
@@ -18,7 +19,8 @@ const saga = createSagaMiddleware()
 
 const store = createStore(
 	getCombinedReducer({
-  heatmapSettings
+  heatmapSettings,
+  barGraphSettings,
 }),
 	applyMiddleware(saga)
 )

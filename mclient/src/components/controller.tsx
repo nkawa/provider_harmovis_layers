@@ -12,6 +12,9 @@ import HeatmapHeight from '../containers/HeatmapHeight'
 import ToggleHeatMap from '../containers/ToggleHeatMap'
 import Toggle3DHeatmap from '../containers/Toggle3DHeatmap'
 import HeatmapTypeSelection from '../containers/HeatmapSelection'
+import BarWidth from '../containers/BarWidth'
+import BarRadius from '../containers/AreaRadius'
+import BarHeight from '../containers/BarHeight'
 //import { HeatmapState } from '../reducer/heatmapSettings'
 
 /*interface Props extends BasedProps{
@@ -187,23 +190,17 @@ export default class Controller extends React.Component<ControllerProps, ContSta
             </li>
           </ul>
             <figure>
-              <figcaption>ヒートマップの設定</figcaption>
+              <figcaption>グラフの設定</figcaption>
               <ol>
-              <li>
-                ヒートマップ表示: <ToggleHeatMap />
-              </li>
-              <li>
-                3次元表示: <Toggle3DHeatmap />
-              </li>
-              <li>
-                グリッドサイズ(m): <HeatmapRaidusRange />
-              </li>
-              <li>
-                高さスケール(m): <HeatmapHeight />
-              </li>
-              <li>
-                グリッド形式: <HeatmapTypeSelection />
-              </li>
+                <li>
+                  エリアの広さ(倍率): <BarRadius/>
+                </li>
+                <li>
+                  グラフの高さ(倍率): <BarHeight />
+                </li>
+                <li>
+                  グラフの幅(倍率): <BarWidth />
+                </li>
               </ol>
             </figure>
         </div>
@@ -244,4 +241,25 @@ export default class Controller extends React.Component<ControllerProps, ContSta
                 <NavigationButton buttonType='compass' actions={actions} viewport={viewport} className='btn btn-outline-light btn-sm w-100' />
               </div>
             </li>
+
+            <figure>
+              <figcaption>ヒートマップの設定</figcaption>
+              <ol>
+              <li>
+                ヒートマップ表示: <ToggleHeatMap />
+              </li>
+              <li>
+                3次元表示: <Toggle3DHeatmap />
+              </li>
+              <li>
+                グリッドサイズ(m): <HeatmapRaidusRange />
+              </li>
+              <li>
+                高さスケール(m): <HeatmapHeight />
+              </li>
+              <li>
+                グリッド形式: <HeatmapTypeSelection />
+              </li>
+              </ol>
+            </figure>
  */
