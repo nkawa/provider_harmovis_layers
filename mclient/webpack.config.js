@@ -28,12 +28,12 @@ module.exports = {
 		{
 			test: /\.(ts)$/,
 			use: [
-//				{loader:"babel-loader"},
-				{loader:"ts-loader",
-				options: {
-					logLevel: "info"
+				{
+					loader:"ts-loader",
+					options: {
+						logLevel: "info"
+					}
 				}
-			}
 			]
 	    },
 	    {
@@ -41,8 +41,8 @@ module.exports = {
 			loader: 'babel-loader',
 			include: [resolve(__dirname, './src')],
 			query: { 
-				"presets": ["@babel/react"] 
-			}
+				presets: ["@babel/react"],
+			},
 	    },
 	    {
 			test: /\.scss$/,
@@ -54,7 +54,11 @@ module.exports = {
 			    'css-loader', // translates CSS into CommonJS
 			    'sass-loader' // compiles Sass to CSS, using Node Sass by default
 			]
-	    }
+		},
+		{
+			test: /\.svg$/,
+			loader: 'babel-loader!react-svg-loader'
+		},
 	]
     },
     plugins: [

@@ -2,25 +2,16 @@ import { LayerProps, CompositeLayer, ColumnLayer, ScatterplotLayer, ColumnLayerP
 import { MovedData } from 'harmoware-vis'
 import { GridType } from '../constants/MapSettings';
 import { Layer } from '@deck.gl/core';
+import { BarData } from '../constants/bargraph';
 
 interface BarLayerProps extends LayerProps {
-    gridType: GridType;
-    movedData: MovedData[];
+    data: MovedData[];
     widthRatio: number;
     heightRatio: number;
     radiusRatio: number;
+    selectBarGraph: (barId: BarData|null) => void; 
 }
 
-interface BarData extends MovedData {
-    data: {id: number, color: number[], value: number, label: string}[];
-    areaColor: number;
-    radius: number;
-    width: number;
-    min: number;
-    max: number;
-    text: number;
-    barType: number;
-}
 
 const BarType = [
     "BT_BOX_FIXCOLOR",
@@ -47,10 +38,26 @@ const getColor = (index: number) => {
 
 export default class BarLayer extends CompositeLayer<BarLayerProps> {
 
+  constructor(props: BarLayerProps){
+    super({...props, pickable: true});
+  }
+
   static layerName = 'BarLayer'
+  getPickingInfo(obj: any) {
+    if (obj.mode !== 'query') {
+        return;
+    }
+
+    const { selectBarGraph } = this.props;
+    const o = obj.info.object;
+    if (o) {
+        const data = obj.info.object;
+        selectBarGraph(data);
+    }
+  }
 
   renderLayers () {
-    const { data, visible, heightRatio, widthRatio, radiusRatio } = this.props
+    const { data, visible, heightRatio, widthRatio, radiusRatio,selectBarGraph } = this.props
     const barData = data as BarData[];
     const layers = [
         new ScatterplotLayer({
@@ -60,6 +67,14 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
             data: barData,
             radiusScale: radiusRatio,
             pickable: true,
+            onClick: (ev) => {
+                console.log('click')
+                console.log(ev)
+            },
+            onHover: (ev) => {
+                console.log('hover')
+                console.log(ev)
+            },
             getRadius: (d: BarData) => d.radius,
             getPosition: (d: BarData) => [d.longitude as number, d.latitude as number],
             getFillColor: (d: BarData) =>  d.areaColor,

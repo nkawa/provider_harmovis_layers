@@ -1,20 +1,29 @@
 import { isType } from 'typescript-fsa'
 import { Action } from 'redux'
 import * as actions from '../actions/actions'
+import { BarData } from '../constants/bargraph'
 
 export interface BarGraphState {
   heightRatio: number
   widthRatio: number
-  radiusRatio: number
+  radiusRatio: number;
+  selectedBarData: BarData|null; 
 }
 
 const initialState: BarGraphState  = {
   heightRatio: 100,
   widthRatio: 1,
   radiusRatio: 1,
+  selectedBarData: null,
 }
 
 export default (state = initialState, action: Action): BarGraphState => {
+  if (isType(action, actions.selectBarGraph)) {
+    return {
+      ...state,
+      selectedBarData: action.payload
+    }
+  }
   if (isType(action, actions.changeBarHeight)) {
     return {
       ...state,

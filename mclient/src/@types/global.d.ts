@@ -1,6 +1,8 @@
 declare module "@deck.gl/geo-layers" {
   import { Layer } from '@deck.gl/core';
   class Tile3DLayers<P, S = {}> extends Layer<P, S> {}
+
+
 }
 
 declare module "deck.gl" {
@@ -25,6 +27,7 @@ declare module "deck.gl" {
     onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
     coordinateSystem?: number;
   }
+  
 
   interface HexagonLayerProps extends LayerProps {
     radius?: number,
@@ -42,11 +45,12 @@ declare module "deck.gl" {
     getPosition: (d: any) => number[],
   }
 
+
   interface ColumnLayerProps<D> extends LayerProps {
     diskResolution?: number; 
     angle?: number;
     vertics?: [];
-    offset?: 0;
+    offset?: number[];
     coverage?: number;
     elevationScale?: number;
     filled?: boolean;
@@ -61,7 +65,7 @@ declare module "deck.gl" {
   export default class DeckGL extends React.Component<any> {}
 
   class CompositeLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
-
+  class GeoJsonLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
   class ScatterplotLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
 
   class GridCellLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
@@ -70,7 +74,9 @@ declare module "deck.gl" {
 
   class HexagonLayer<P extends HexagonLayerProps, S = {}> extends Layer<P, S> {}
   class GridLayer<P extends HexagonLayerProps, S = {}> extends Layer<P, S> {}
-  class ColumnLayer<P extends ColumnLayerProps, S = {}> extends Layer<P, S> {}
+  class ColumnLayer<P extends ColumnLayerProps<any>, S = {}> extends Layer<P, S> {
+    offset: number[];
+  }
 
   class ArcLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
 

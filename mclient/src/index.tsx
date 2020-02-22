@@ -1,29 +1,17 @@
 import React from 'react'
 import { render } from 'react-dom'
-import { getCombinedReducer } from 'harmoware-vis'
-import { createStore, applyMiddleware } from 'redux'
 
 import { Provider } from 'react-redux'
 import App from './containers/app'
-import heatmapSettings from './reducer/heatmapSettings'
-import barGraphSettings from './reducer/barGraphSettings'
 
-import createSagaMiddleware from 'redux-saga'
 
 import 'mapbox-gl/src/css/mapbox-gl.css'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './scss/harmovis.scss'
+import store from './store'
 
-const saga = createSagaMiddleware()
 
-const store = createStore(
-	getCombinedReducer({
-  heatmapSettings,
-  barGraphSettings,
-}),
-	applyMiddleware(saga)
-)
 
 render(
 	<Provider store={store as any}>

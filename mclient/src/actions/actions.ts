@@ -1,6 +1,7 @@
 import actionCreatorFactory from 'typescript-fsa'
 import * as types from '../constants/actionTypes'
 import { GridType } from '../constants/MapSettings'
+import { BarData } from '../constants/bargraph'
 
 const actionCreator = actionCreatorFactory()
 
@@ -10,6 +11,7 @@ export const setParticleCount = actionCreator<number>(types.SET_PARTICLE_COUNT)
 export const changeBarHeight = actionCreator<number>('CHANGE_BAR_HEIGHT')
 export const changeBarWidth = actionCreator<number>('CHANGE_BAR_WIDTH')
 export const changeBarRadius = actionCreator<number>('CHANGE_BAR_RADIUS')
+export const selectBarGraph = actionCreator<BarData|null>('SELECT_BAR_GRAPH')
 export const toggleHeatmap = actionCreator<boolean>(types.TOGGLE_HEATMAP)
 export const selectHeatmapType = actionCreator<GridType>(types.CHANGE_HEATMAP_TYPE)
 export const extrudeHeatmap = actionCreator<boolean>(types.EXTRUDE_HEATMAP)

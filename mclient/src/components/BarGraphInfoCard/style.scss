@@ -1,0 +1,23 @@
+.bargraph-card {
+    z-index: 999;
+    width: 230px;
+    position: absolute;
+    padding: 10px;
+    left: 50px;
+    top: 50px;
+    background-color: #333333;
+    color: #cccccc;
+    &__title {
+        font-size: 24px;
+    }
+    &__content {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.bargraph-carditem {
+    font-size: 14px;
+    color: #cccccc;
+    display: flex;
+}
