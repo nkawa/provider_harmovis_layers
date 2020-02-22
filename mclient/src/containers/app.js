@@ -12,6 +12,14 @@ import { SocketMsgTypes } from '../constants/workerMessageTypes'
 import BarLayer from './BarLayer'
 import { GridType } from '../constants/MapSettings'
 
+const toArrayColor = (color) => {
+	return [
+		((color & 0xFF0000) >> 16),
+		((color & 0x00FF00) >> 8),
+		(color & 0x0000FF)
+	]
+}
+
 class App extends Container {
 	constructor (props) {
 		super(props)
@@ -106,7 +114,6 @@ class App extends Container {
 		const bars = data.bars
 		const getData = i => {
 			const bar = bars[i]
-			console.log(bar)
 			const time = bar.ts.seconds
 			return {
 				elapsedtime: time,
@@ -114,15 +121,12 @@ class App extends Container {
 				angle: 0,
 				speed: 0,
 				barType: bar.type,
+				areaColor: toArrayColor(bar.color),
 				data: bar.barData.map(b => {
 					const color = b.color;
 					return {
 						value: b.value,
-						color: [
-							((color & 0xFF0000) >> 16),
-							((color & 0x00FF00) >> 8),
-							(color & 0x0000FF)
-						],
+						color: toArrayColor(color),
 						label: b.label,
 					}
 				}),

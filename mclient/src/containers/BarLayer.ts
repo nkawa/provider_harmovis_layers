@@ -12,13 +12,14 @@ interface BarLayerProps extends LayerProps {
 }
 
 interface BarData extends MovedData {
-    data: {id: number, color: number[], value: number, label: string}[],
-    radius: number,
-    width: number,
-    min: number,
-    max: number,
-    text: number,
-    barType: number,
+    data: {id: number, color: number[], value: number, label: string}[];
+    areaColor: number;
+    radius: number;
+    width: number;
+    min: number;
+    max: number;
+    text: number;
+    barType: number;
 }
 
 const BarType = [
@@ -29,19 +30,19 @@ const BarType = [
 ]
 
 const getColor = (index: number) => {
-    let r = 0x00;
-    let g = 0x00;
-    let b = 0x00;
+    let red = 0;
+    let green = 0;
+    let blue = 0;
     index++;
     const ratio = Math.floor(index/3);
     if (index%3 === 0) {
-        b = 0xff - 0x11 * ratio;
+        green = 0xff - 0x11 * ratio;
     } else if (index%3 === 1) {
-        b = 0xff - 0x11 * ratio;
+        blue = 0xff - 0x11 * ratio;
     } else {
-        r = 0xff - 0x11 * ratio;
+        red = 0xff - 0x11 * ratio;
     }
-    return [r, g, b]
+    return [red, green, blue]
 }
 
 export default class BarLayer extends CompositeLayer<BarLayerProps> {
@@ -58,16 +59,19 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
             opacity: 1,
             data: barData,
             radiusScale: radiusRatio,
+            pickable: true,
             getRadius: (d: BarData) => d.radius,
             getPosition: (d: BarData) => [d.longitude as number, d.latitude as number],
-            getFillColor: [0,125,30],
+            getFillColor: (d: BarData) =>  d.areaColor,
         })
     ] as Layer[];
     const columnDataMap = barData
         .flatMap( d => {
             return d.data.map((vdata, index) => {
+                debugger;
                 return {
                     index,
+                    name: d.text,
                     type: d.barType,
                     width: d.width,
                     value: vdata.value,
@@ -79,7 +83,7 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
             });
         })
         .reduce((prev, data) => {
-            const key = data.index+'_'+data.type+data.width
+            const key = data.index+'_'+data.type+'_'+data.width
             const prevData = prev[key]
             if (prevData) {
                 prevData.push(data)
@@ -97,13 +101,14 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
             id: 'grid-cell-layer-' + index + type +window,
             data: column,
             extruded: true,
+            pickable: true,
             diskResolution: type.includes('HEX') ? 4 : 6,
             offset: [2.5*index-2.5, 0],
             radius: width * widthRatio,
             elevationScale: heightRatio,
             getPosition: (d: any) => [d.longitude, d.latitude],
             getFillColor: (d: any) => {
-                isFixColor ? getColor(index) : d.color
+                return isFixColor ? getColor(index) : d.color
             },
             getElevation: (d: any) => d.value,
         });
