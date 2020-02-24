@@ -29,7 +29,7 @@ import (
 var (
 	nodesrv         = flag.String("nodesrv", "127.0.0.1:9990", "Node ID Server")
 	assetDir        = flag.String("assetdir", "", "set Web client dir")
-	mapbox          = flag.String("mapbox", "pk.eyJ1IjoidG1rbnltIiwiYSI6ImNrNHYxYXpnaDA0cW0zbWxuMmFvenk2YWQifQ.qnyervUr4gXlIAvpGzVpdA", "Set Mapbox access token")
+	mapbox          = flag.String("mapbox", "", "Set Mapbox access token")
 	port            = flag.Int("port", 10080, "HarmoVis Ext Provider Listening Port")
 	mu              = new(sync.Mutex)
 	version         = "0.02"
