@@ -117,6 +117,11 @@ class App extends Container<any, any> {
 			const time = bar.ts.seconds
 			return {
 				id: bar.id,
+				movesbaseidx: bar.id,
+				sourcePosition: [],
+				sourceColor: [],
+				targetPosition: [],
+				targetColor: [],
 				elapsedtime: time,
 				position: [bar.lon, bar.lat, 0],
 				angle: 0,
@@ -136,30 +141,28 @@ class App extends Container<any, any> {
 				min: bar.min,
 				max: bar.max,
 				text: bar.text,
-			}
+			} as BarData
 		}
-
 		let  setMovesbase = []
-		if (movesbase.length == 0) {
-			for (let i = 0, len = bars.length; i < len; i++) {
-				const barData = getData(i);
+		for (let i = 0, len = bars.length; i < len; i++) {
+			const barData = getData(i);
+			const base = movesbase.find((m: any)=> m.id === barData.id)
+			if (base) {
+				base.arrivaltime = barData.elapsedtime
+				base.operation.push(barData)
+				setMovesbase.push(base)
+			} else {
 				setMovesbase.push({
 					mtype: 0,
-					id: i,
+					id: barData.id,
 					departuretime: barData.elapsedtime,
 					arrivaltime: barData.elapsedtime,
 					operation: [barData]
 				})
 			}
-		} else {
-			for (let i = 0, lengthi = movesbase.length; i < lengthi; i ++) {
-				const barData = getData(i);
-				movesbase[i].arrivaltime = barData.elapsedtime
-				movesbase[i].operation.push(getData(i))
-			}
-			setMovesbase = movesbase
+			this._updateSelectedBarGraph(barData);
 		}
-		actions.updateMovesBase(setMovesbase)
+		actions.updateMovesBase(setMovesbase);
 	}
 
 	getEvent (socketData:any) {
@@ -393,6 +396,14 @@ class App extends Container<any, any> {
 					this._selectBarGraph(null)
 				}}
 			/>
+		}
+	}
+	_updateSelectedBarGraph = (barData: BarData) => {
+		const { selectedBarData } = this.props;
+		console.log(selectedBarData)
+		console.log(barData)
+		if (selectedBarData && selectedBarData.id === barData.id) {
+			store.dispatch(selectBarGraph(barData))
 		}
 	}
 	_selectBarGraph = (data: BarData|null) => {

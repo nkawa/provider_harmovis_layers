@@ -56,9 +56,12 @@ module.exports = {
 			]
 		},
 		{
-			test: /\.svg$/,
-			loader: 'babel-loader!react-svg-loader'
-		},
+			test: /\.(svg|png|jpe?g|gif)$/i,
+			loader: 'file-loader',
+			options: {
+			name: '[path][name].[ext]',
+			},
+		}
 	]
     },
     plugins: [

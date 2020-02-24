@@ -5,7 +5,8 @@ export interface DataItem {id: number, color: number[], value: number, label: st
 export interface BarData extends MovedData {
     id: number|string;
     data: DataItem[];
-    areaColor: number;
+    elapsedtime: number;
+    areaColor: number[];
     radius: number;
     width: number;
     min: number;
