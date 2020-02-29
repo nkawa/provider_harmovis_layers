@@ -69,8 +69,10 @@ declare module "deck.gl" {
   class ScatterplotLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
 
   class GridCellLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
+  class IconLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
 
   class LineLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
+  class TextLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
 
   class HexagonLayer<P extends HexagonLayerProps, S = {}> extends Layer<P, S> {}
   class GridLayer<P extends HexagonLayerProps, S = {}> extends Layer<P, S> {}

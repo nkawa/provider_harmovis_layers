@@ -11,6 +11,6 @@ export interface BarData extends MovedData {
     width: number;
     min: number;
     max: number;
-    text: number;
+    text: string;
     barType: number;
 }

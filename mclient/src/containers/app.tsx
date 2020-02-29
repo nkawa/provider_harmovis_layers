@@ -3,14 +3,17 @@ import {
 	Container, connectToHarmowareVis, HarmoVisLayers, MovesLayer, MovesInput,
 	LoadingIcon, FpsDisplay, DepotsLayer, EventInfo, MovesbaseOperation, BasedProps
 } from 'harmoware-vis'
-import { GeoJsonLayer } from 'deck.gl'
+import { GeoJsonLayer, LineLayer } from 'deck.gl'
 import Controller from '../components/controller'
 import { SocketMsgTypes } from '../constants/workerMessageTypes'
 import BarLayer from './BarLayer'
 import BarGraphInfoCard from '../components/BarGraphInfoCard'
-import { selectBarGraph } from '../actions/actions'
+import { selectBarGraph, removeBallonInfo, appendBallonInfo, updateBallonInfo } from '../actions/actions'
 import store from '../store'
 import { BarData } from '../constants/bargraph'
+import HeatmapLayer from './HeatmapLayer'
+import InfomationBalloonLayer from './InfomationBalloonLayer'
+import { BalloonInfo } from '../constants/informationBalloon'
 
 const toArrayColor = (color: number) => {
 	return [
@@ -21,6 +24,9 @@ const toArrayColor = (color: number) => {
 }
 
 class App extends Container<any, any> {
+
+	private lines = 0;
+
 	constructor (props: any) {
 		super(props)
 		const { setSecPerHour, setLeading, setTrailing } = props.actions
@@ -74,15 +80,11 @@ class App extends Container<any, any> {
   	}
 
 	getGeoJson (data: string) {
-		console.log('Geojson:' + data.length)
-		console.log(data)
 		this.setState({ geojson: JSON.parse(data) })
 	}
 
 	getViewState (data: any) {
-		console.log('setViewState:' + data)
 		let vs = JSON.parse(data)
-		console.log('vs:',vs)
 		this.setState({
 			viewState: {
 				latitude: vs.lat,
@@ -97,7 +99,6 @@ class App extends Container<any, any> {
 	}
 
 	getLines (data: any) {
-		console.log('getLines!:' + data.length)
 // 		console.log(data)
 		if (this.state.lines.length > 0) {
 			const ladd = JSON.parse(data)
@@ -160,7 +161,7 @@ class App extends Container<any, any> {
 					operation: [barData]
 				})
 			}
-			this._updateSelectedBarGraph(barData);
+			this._updateBalloonInfo(barData);
 		}
 		actions.updateMovesBase(setMovesbase);
 	}
@@ -251,9 +252,7 @@ class App extends Container<any, any> {
 			if (!animatePause) {
 				actions.setAnimatePause(false)
 			}
-		console.log('viewState')
 // 		console.log(this.map.getMap())
-		console.log(this.state.viewState)
 
 // 		this.map.getMap().flyTo({ center: [-118.4107187, 33.9415889] })
 // 		console.log(this.state.viewState)
@@ -296,7 +295,9 @@ class App extends Container<any, any> {
 
 	render () {
 		const props = this.props
-		const { actions, viewport,  movedData, widthRatio, heightRatio, radiusRatio } = props
+		const { actions, viewport, titlePosOffset, movedData, widthRatio, heightRatio, radiusRatio,  lightSettings, 
+			infoBalloonList, enabledHeatmap, selectedType, gridSize, gridHeight, routePaths, movesbase, clickedObject,
+		} = props
 		const onHover = (el: any) => {
 			if (el && el.object) {
 				let disptext = ''
@@ -319,7 +320,15 @@ class App extends Container<any, any> {
 			widthRatio,
 			heightRatio,
 			radiusRatio,
-			selectBarGraph: this._selectBarGraph
+			selectBarGraph: this._selectBarGraph,
+			titlePositionOffset: titlePosOffset
+		}))
+		layers.push(new InfomationBalloonLayer({
+			id: 'info-layer',
+			infoList: infoBalloonList,
+			handleIconClicked: (id) => {
+				store.dispatch(removeBallonInfo(id));
+			}
 		}))
 		if (this.state.geojson != null) {
 			layers.push(
@@ -344,6 +353,56 @@ class App extends Container<any, any> {
 		const {viewState} = this.state
 
 		// wait until mapbox_token is given from harmo-vis provider.
+
+		if (this.state.lines.length > 0) {
+			this.lines = 0
+			layers.push(
+				new LineLayer({
+					visible: true,
+					data: this.state.lines,
+					getSourcePosition: (d: any) => d.from,
+					getTargetPosition: (d: any) => d.to,
+					getColor: this.state.linecolor,
+					getWidth: 1.0,
+					widthMinPixels: 0.5
+				})
+			)
+
+		}
+		if (this.state.moveDataVisible && movedData.length > 0) {
+			layers.push(
+				new MovesLayer({
+					routePaths,
+					movesbase,
+					movedData,
+					clickedObject,
+					actions,
+					visible: this.state.moveDataVisible,
+					optionVisible: this.state.moveOptionVisible,
+					layerRadiusScale: 0.03,
+					layerOpacity: 0.8,
+					getStrokeWidth: 0.1,
+					getColor : () => [0,200,20],
+					optionCellSize: 2,
+					sizeScale: 20,
+					iconChange: false,
+					optionChange: false, // this.state.optionChange,
+					onHover
+				}) as any
+			)
+		}
+		if (enabledHeatmap) {
+			layers.push(
+				new HeatmapLayer({
+					visible: enabledHeatmap,
+					type: selectedType,
+					extruded: true,
+					movedData,
+					size: gridSize,
+					height: gridHeight
+				  })
+			)
+		}
 		const visLayer =
 			(this.state.mapbox_token.length > 0) ?
 				<HarmoVisLayers 
@@ -354,7 +413,6 @@ class App extends Container<any, any> {
 					layers={layers}
 				/>
 				: <LoadingIcon loading={true} />
-
 		return (
 			<div>
 				<Controller
@@ -400,72 +458,42 @@ class App extends Container<any, any> {
 	}
 	_updateSelectedBarGraph = (barData: BarData) => {
 		const { selectedBarData } = this.props;
-		console.log(selectedBarData)
-		console.log(barData)
 		if (selectedBarData && selectedBarData.id === barData.id) {
 			store.dispatch(selectBarGraph(barData))
 		}
 	}
+
+	_updateBalloonInfo = (data: BarData|null) => {
+		if (data) {
+			const { infoBalloonList } = this.props;
+			const balloon = infoBalloonList.find((i: BalloonInfo) => i.id === data.id)
+			if (balloon) {
+				this._selectBarGraph(data);
+			}
+		}
+	}
+
 	_selectBarGraph = (data: BarData|null) => {
-		store.dispatch(selectBarGraph(data))
+		if (!!data) {
+			const { infoBalloonList } = this.props;
+			const ballon = infoBalloonList.find((i: BalloonInfo) => i.id === data.id)
+			const newInfo = {
+				id: data.id as string,
+				position: [data.longitude as number, data.latitude as number],
+				title: data.text,
+				items: data.data.map(item => (item.label+' : '+item.value))
+			}
+			if (!ballon) {
+				store.dispatch(appendBallonInfo(newInfo))
+			} else {
+				store.dispatch(updateBallonInfo(newInfo))
+			}
+	}
+		// store.dispatch(selectBarGraph(data))
 	}
 }
 export default connectToHarmowareVis(App);
 
-		/*
-		if (this.state.lines.length > 0) {
-			this.lines = 0
-			layers.push(
-				new LineLayer({
-					visible: true,
-					data: this.state.lines,
-					getSourcePosition: d => d.from,
-					getTargetPosition: d => d.to,
-					getColor: this.state.linecolor,
-					getWidth: 1.0,
-					widthMinPixels: 0.5
-				})
-			)
-
-		}
-		*/
-
-		/*
-		if (this.state.moveDataVisible && movedData.length > 0) {
-			layers.push(
-				new MovesLayer({
-					viewport, routePaths, movesbase, movedData,
-					clickedObject, actions, lightSettings,
-					visible: this.state.moveDataVisible,
-					optionVisible: this.state.moveOptionVisible,
-					layerRadiusScale: 0.03,
-					layerOpacity: 0.8,
-					getRaduis: 0.2,
-					getStrokeWidth: 0.1,
-					getColor : [0,200,20],
-					optionCellSize: 2,
-					sizeScale: 20,
-					iconChange: false,
-					optionChange: false, // this.state.optionChange,
-					onHover
-				})
-			)
-		}
-		
-
-		if (enabledHeatmap) {
-			layers.push(
-				new HeatmapLayer({
-					visible: enabledHeatmap,
-					type: selectedType,
-					extruded,
-					movedData,
-					size: gridSize,
-					height: gridHeight
-				  })
-			)
-		}
-		*/
 
 /*					<div style={{ position: "absolute", left: 30, top: 120, zIndex: 1 }}>
 						<NavigationControl />

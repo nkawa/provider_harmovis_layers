@@ -1,6 +1,5 @@
-import { LayerProps, CompositeLayer, ColumnLayer, ScatterplotLayer, ColumnLayerProps } from 'deck.gl'
+import { LayerProps, CompositeLayer, ColumnLayer, ScatterplotLayer, TextLayer } from 'deck.gl'
 import { MovedData } from 'harmoware-vis'
-import { GridType } from '../constants/MapSettings';
 import { Layer } from '@deck.gl/core';
 import { BarData } from '../constants/bargraph';
 
@@ -9,6 +8,7 @@ interface BarLayerProps extends LayerProps {
     widthRatio: number;
     heightRatio: number;
     radiusRatio: number;
+    titlePositionOffset: number;
     selectBarGraph: (barId: BarData|null) => void; 
 }
 
@@ -36,6 +36,24 @@ const getColor = (index: number) => {
     return [red, green, blue]
 }
 
+const isBarData = (data: MovedData): data is BarData => {
+    const bar = data as BarData;
+    return bar.data !== undefined &&
+        bar.barType !== undefined &&
+        bar.width !== undefined;
+}
+
+const extractCharCode = (data: BarData[]) => {
+    const charSet: string[] = []
+    data.forEach((d) => {
+        const text = d.text;
+        for (let i = 0; i < text.length; i++) {
+            charSet.push(text[i])
+        }
+    })
+    return charSet;
+}
+
 export default class BarLayer extends CompositeLayer<BarLayerProps> {
 
   constructor(props: BarLayerProps){
@@ -43,11 +61,11 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
   }
 
   static layerName = 'BarLayer'
+
   getPickingInfo(obj: any) {
     if (obj.mode !== 'query') {
         return;
     }
-
     const { selectBarGraph } = this.props;
     const o = obj.info.object;
     if (o) {
@@ -57,10 +75,12 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
   }
 
   renderLayers () {
-    const { data, visible, heightRatio, widthRatio, radiusRatio,selectBarGraph } = this.props
-    const barData = data as BarData[];
+    const { data, visible, heightRatio, widthRatio, radiusRatio, titlePositionOffset } = this.props
+    const barData = data.filter((b) => isBarData(b)) as BarData[]
+    const charset = extractCharCode(barData)
     const layers = [
         new ScatterplotLayer({
+            id: 'bargraph-scatterplot-layer',
             visible,
             extruded: true,
             opacity: 1,
@@ -68,22 +88,32 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
             radiusScale: radiusRatio,
             pickable: true,
             onClick: (ev) => {
-                console.log('click')
-                console.log(ev)
             },
             onHover: (ev) => {
-                console.log('hover')
-                console.log(ev)
             },
             getRadius: (d: BarData) => d.radius,
-            getPosition: (d: BarData) => [d.longitude as number, d.latitude as number],
+            getPosition: (d: BarData) => [d.longitude, d.latitude],
             getFillColor: (d: BarData) =>  d.areaColor,
-        })
+        }),
+        new TextLayer({
+            id: 'bargraph-text-layer',
+            data: barData,
+            characterSet: charset,
+            getPosition: (d: BarData) => [d.longitude, d.latitude],
+            getPixelOffset: () => [0, titlePositionOffset],
+            fontFamily: 'Noto Sans JP',
+            getSize: 32,
+            getColor: [255,255,255],
+            getTextAnchor: 'middle',
+            getAlignmentBaseline: 'top',
+            getText: (d: BarData) => {
+                return d.text
+            },
+        }),
     ] as Layer[];
     const columnDataMap = barData
         .flatMap( d => {
             return d.data.map((vdata, index) => {
-                debugger;
                 return {
                     index,
                     name: d.text,

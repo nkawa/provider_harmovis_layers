@@ -12,9 +12,10 @@ import HeatmapHeight from '../containers/HeatmapHeight'
 import ToggleHeatMap from '../containers/ToggleHeatMap'
 import Toggle3DHeatmap from '../containers/Toggle3DHeatmap'
 import HeatmapTypeSelection from '../containers/HeatmapSelection'
-import BarWidth from '../containers/BarWidth'
-import BarRadius from '../containers/AreaRadius'
-import BarHeight from '../containers/BarHeight'
+import BarWidth from './BarGraphController/BarWidth'
+import BarRadius from './BarGraphController/AreaRadius'
+import BarHeight from './BarGraphController/BarHeight'
+import BargraphController from './BarGraphController'
 //import { HeatmapState } from '../reducer/heatmapSettings'
 
 /*interface Props extends BasedProps{
@@ -189,20 +190,7 @@ export default class Controller extends React.Component<ControllerProps, ContSta
               </div>
             </li>
           </ul>
-            <figure>
-              <figcaption>グラフの設定</figcaption>
-              <ol>
-                <li>
-                  エリアの広さ(倍率): <BarRadius/>
-                </li>
-                <li>
-                  グラフの高さ(倍率): <BarHeight />
-                </li>
-                <li>
-                  グラフの幅(倍率): <BarWidth />
-                </li>
-              </ol>
-            </figure>
+            <BargraphController />
         </div>
       </div>
     )

@@ -12,7 +12,6 @@ socket.on('disconnect', () => { console.log('Socket.IO disconnected!') })
 const worker = self as any
 self.addEventListener("message", (e: any) => {
     const type = e.data[0];
-    console.log(e);
 });
 // start socket server
 socket.on('connect', () => {
