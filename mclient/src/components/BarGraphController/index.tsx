@@ -3,6 +3,7 @@ import BarWidth from './BarWidth'
 import BarRadius from './AreaRadius'
 import BarHeight from './BarHeight'
 import TitleOffset from './TitlePositionOffset'
+import ShowTitle from './ShowTitle'
 
 export default function BargraphController() {
 
@@ -20,7 +21,10 @@ export default function BargraphController() {
                   グラフの幅(倍率): <BarWidth />
                 </li>
                 <li>
-                  タイトルのオフセット: <TitleOffset />
+                  タイトルの表示: <ShowTitle />
+                </li>
+                <li>
+                  タイトルのオフセット(px): <TitleOffset />
                 </li>
               </ol>
             </figure>

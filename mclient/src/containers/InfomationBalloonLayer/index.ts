@@ -12,6 +12,7 @@ interface TextData {
     isTitle: boolean;
     position: number[];
     label: string;
+    color: number[];
     offset: number;
 }
 
@@ -50,19 +51,21 @@ export default class InfomationBalloonLayer extends CompositeLayer<InfomationBal
     const textData = infoList.flatMap(info => {
         toStrArray(info.title, charset)
         const items = info.items.map((item, i) => {
-            toStrArray(item, charset)
+            toStrArray(item.text, charset)
             return {
                 isTitle: false,
                 position: info.position,
                 offset: i+1,
-                label: item
+                label: item.text,
+                color: item.color
             } as TextData;
         })
         items.push({
             isTitle: true,
             position: info.position,
             offset: 0,
-            label: info.title
+            label: info.title,
+            color: info.titleColor,
         })
         return items
     })
@@ -88,7 +91,7 @@ export default class InfomationBalloonLayer extends CompositeLayer<InfomationBal
             getPixelOffset: (d: TextData) => [0, d.offset * (fontSize + 10) + iconSize/5 - (d.isTitle? 5 : 0)],
             fontFamily: 'Noto Sans JP',
             getSize: (d: TextData) => d.isTitle ? titleSize : fontSize,
-            getColor: [255,255,255],
+            getColor: (d: TextData) => d.color,
             getTextAnchor: 'middle',
             getAlignmentBaseline: 'top',
             getText: (d: TextData) => {

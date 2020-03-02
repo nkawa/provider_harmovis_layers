@@ -9,6 +9,7 @@ export interface BarGraphState {
   radiusRatio: number;
   selectedBarData: BarData|null; 
   titlePosOffset: number; 
+  showTitle: boolean;
 }
 
 const initialState: BarGraphState  = {
@@ -17,6 +18,7 @@ const initialState: BarGraphState  = {
   radiusRatio: 1,
   selectedBarData: null,
   titlePosOffset: 50,
+  showTitle: false
 }
 
 export default (state = initialState, action: Action): BarGraphState => {
@@ -48,6 +50,12 @@ export default (state = initialState, action: Action): BarGraphState => {
     return {
       ...state,
       widthRatio: action.payload
+    }
+  }
+  if (isType(action, actions.showBarTitle)) {
+    return {
+      ...state,
+      showTitle: action.payload
     }
   }
   return state

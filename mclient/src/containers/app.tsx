@@ -13,15 +13,8 @@ import store from '../store'
 import { BarData } from '../constants/bargraph'
 import HeatmapLayer from './HeatmapLayer'
 import InfomationBalloonLayer from './InfomationBalloonLayer'
-import { BalloonInfo } from '../constants/informationBalloon'
+import { BalloonInfo, BalloonItem } from '../constants/informationBalloon'
 
-const toArrayColor = (color: number) => {
-	return [
-		((color & 0xFF0000) >> 16),
-		((color & 0x00FF00) >> 8),
-		(color & 0x0000FF)
-	]
-}
 
 class App extends Container<any, any> {
 
@@ -112,41 +105,10 @@ class App extends Container<any, any> {
 
 	getBargraph (data: any) {
 		const { actions, movesbase } = this.props
-		const bars = data.bars
-		const getData = (i: number) => {
-			const bar = bars[i]
-			const time = bar.ts.seconds
-			return {
-				id: bar.id,
-				movesbaseidx: bar.id,
-				sourcePosition: [],
-				sourceColor: [],
-				targetPosition: [],
-				targetColor: [],
-				elapsedtime: time,
-				position: [bar.lon, bar.lat, 0],
-				angle: 0,
-				speed: 0,
-				barType: bar.type,
-				areaColor: toArrayColor(bar.color),
-				data: bar.barData.map((b: any) => {
-					const color = b.color;
-					return {
-						value: b.value,
-						color: toArrayColor(color),
-						label: b.label,
-					}
-				}),
-				radius: bar.radius,
-				width: bar.width,
-				min: bar.min,
-				max: bar.max,
-				text: bar.text,
-			} as BarData
-		}
+		const bars = data;
 		let  setMovesbase = []
 		for (let i = 0, len = bars.length; i < len; i++) {
-			const barData = getData(i);
+			const barData = bars[i];
 			const base = movesbase.find((m: any)=> m.id === barData.id)
 			if (base) {
 				base.arrivaltime = barData.elapsedtime
@@ -167,51 +129,6 @@ class App extends Container<any, any> {
 	}
 
 	getEvent (socketData:any) {
-		const { actions, movesbase } = this.props
-		const { mtype, id, lat, lon, angle, speed } = JSON.parse(socketData)
-		// 	console.log("dt:",mtype,id,time,lat,lon,angle,speed, socketData);
-		
-		const time = Date.now() / 1000 // set time as now. (If data have time, ..)
-		const newData = {
-			id: (Math.random() * 9999).toString(),
-			elapsedtime: time,
-			position: [lon, lat, 0],
-			angle, speed,
-			barType: id/2 ? 'BT_BOX_FIXCOLOR' : 'BT_HEX_FIXCOLOR ',
-			color: [255, 0, 0],
-			value: 100,
-			radius: 800,
-			width: 250,
-			min: 10,
-			max: 200,
-			text: 100,
-		}
-		let hit = false
-		const movesbasedata = [...movesbase] // why copy !?
-		const setMovesbase = []
-
-		for (let i = 0, lengthi = movesbasedata.length; i < lengthi; i += 1) {
-			// 	    let setMovedata = Object.assign({}, movesbasedata[i]);
-			let setMovedata = movesbasedata[i]
-			if (mtype === setMovedata.mtype && id === setMovedata.id) {
-				hit = true
-				// 		const {operation } = setMovedata;
-				// 		const arrivaltime = time;
-				setMovedata.arrivaltime = time
-				setMovedata.operation.push(newData)
-				// 		setMovedata = Object.assign({}, setMovedata, {arrivaltime, operation});
-			}
-			setMovesbase.push(setMovedata)
-		}
-		if (!hit) {
-			setMovesbase.push({
-				mtype, id,
-				departuretime: time,
-				arrivaltime: time,
-				operation: [newData]
-			})
-		}
-		actions.updateMovesBase(setMovesbase)
 	}
 
 	deleteMovebase (maxKeepSecond: any) {
@@ -296,7 +213,7 @@ class App extends Container<any, any> {
 	render () {
 		const props = this.props
 		const { actions, viewport, titlePosOffset, movedData, widthRatio, heightRatio, radiusRatio,  lightSettings, 
-			infoBalloonList, enabledHeatmap, selectedType, gridSize, gridHeight, routePaths, movesbase, clickedObject,
+			showTitle, infoBalloonList, enabledHeatmap, selectedType, gridSize, gridHeight, routePaths, movesbase, clickedObject,
 		} = props
 		const onHover = (el: any) => {
 			if (el && el.object) {
@@ -321,7 +238,8 @@ class App extends Container<any, any> {
 			heightRatio,
 			radiusRatio,
 			selectBarGraph: this._selectBarGraph,
-			titlePositionOffset: titlePosOffset
+			titlePositionOffset: titlePosOffset,
+			showTitle, 
 		}))
 		layers.push(new InfomationBalloonLayer({
 			id: 'info-layer',
@@ -477,12 +395,17 @@ class App extends Container<any, any> {
 		if (!!data) {
 			const { infoBalloonList } = this.props;
 			const ballon = infoBalloonList.find((i: BalloonInfo) => i.id === data.id)
-			const newInfo = {
+			const newInfo: BalloonInfo = {
 				id: data.id as string,
-				position: [data.longitude as number, data.latitude as number],
+				titleColor: [0xff, 0xff, 0xff],
+				position: data.position,
 				title: data.text,
-				items: data.data.map(item => (item.label+' : '+item.value))
+				items: data.data.map((item): BalloonItem => ({
+					text: (item.label+' : '+item.value),
+					color: item.color
+				})),
 			}
+
 			if (!ballon) {
 				store.dispatch(appendBallonInfo(newInfo))
 			} else {

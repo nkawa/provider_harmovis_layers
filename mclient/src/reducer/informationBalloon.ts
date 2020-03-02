@@ -8,14 +8,7 @@ export interface InformationBalloonState {
 }
 
 const initialState: InformationBalloonState  = {
-    infoBalloonList: [{
-      id: 'zz',
-      position: [136.743642, 34.955052],
-      title: 'test',
-      items: [
-        'テストだよ'
-      ]
-    }]
+    infoBalloonList: []
 }
 
 export default (state = initialState, action: Action): InformationBalloonState => {
@@ -35,13 +28,12 @@ export default (state = initialState, action: Action): InformationBalloonState =
   }
   if (isType(action, actions.updateBallonInfo)) {
     const info = action.payload
-    const data = state.infoBalloonList.find(b => b.id !== info.id)
-    if (data) {
-      data.items = info.items;
-      data.title = info.title;
-      data.position = data.position;
+    const data = state.infoBalloonList.filter(b => b.id !== info.id)
+    if (data.length !== state.infoBalloonList.length) {
+      data.push(info);
       return {
-        ...state
+        ...state,
+        infoBalloonList: data,
       }
     }
 
