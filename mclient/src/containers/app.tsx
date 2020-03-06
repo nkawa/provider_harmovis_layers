@@ -208,6 +208,13 @@ class App extends Container<any, any> {
 		this.setState({viewState})
 	}
 
+	componentDidMount(){
+		super.componentDidMount();
+		const { setNoLoop, setAddSec } = this.props.actions
+		setNoLoop(true);
+		setAddSec(10);
+	}
+
 	render () {
 		const props = this.props
 		const { actions, viewport, settime, titlePosOffset, movedData, widthRatio, heightRatio, radiusRatio,  lightSettings, 
