@@ -3412,10 +3412,10 @@ hard-source-webpack-plugin@^0.13.1:
     webpack-sources "^1.0.1"
     write-json-file "^2.3.0"
 
-harmoware-vis@1.4.4:
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/harmoware-vis/-/harmoware-vis-1.4.4.tgz#5ed7da011d40af1a028acdefd85c759d2649fa13"
-  integrity sha512-dL9XxqgTxY3xU3wMtlc3VTUmLpoTWeW5IVBFY7FIaayKkObwrcyhMFIRe+ITMlCXRKsyHYdemqWYSR2umeZzQw==
+harmoware-vis@1.5.4:
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/harmoware-vis/-/harmoware-vis-1.5.4.tgz#d0d707dd34628f9e14f4e6f829d110ca5df4c5a7"
+  integrity sha512-lUD4pb8DRWYUm2keQNj2PWjc9mn+kQSJ7siFM85c5Oc/GTNG884X+ZA8SYuJ+tRMBOFfMjN3FtzMRc9EDiLDGg==
   dependencies:
     "@luma.gl/core" "^7.3.2"
     deck.gl "^7.3.3"

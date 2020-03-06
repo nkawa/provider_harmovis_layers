@@ -299,8 +299,7 @@ class App extends Container<any, any> {
 					optionVisible: this.state.moveOptionVisible,
 					layerRadiusScale: 0.03,
 					layerOpacity: 0.8,
-					getStrokeWidth: 0.1,
-					getColor : () => [0,200,20],
+					getRouteWidth: () => 0.1,
 					optionCellSize: 2,
 					sizeScale: 20,
 					iconChange: false,
@@ -398,7 +397,7 @@ class App extends Container<any, any> {
 			const newInfo: BalloonInfo = {
 				id: data.id as string,
 				titleColor: [0xff, 0xff, 0xff],
-				position: data.position,
+				position: data.position?? [],
 				title: data.text,
 				items: data.data.map((item): BalloonItem => ({
 					text: (item.label+' : '+item.value),

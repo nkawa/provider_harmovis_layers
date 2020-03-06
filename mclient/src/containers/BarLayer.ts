@@ -69,7 +69,7 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
             onHover: (ev) => {
             },
             getRadius: (d: BarData) => d.radius,
-            getPosition: (d: BarData) => [d.longitude, d.latitude],
+            getPosition: (d: BarData) => d.position,
             getFillColor: (d: BarData) =>  d.areaColor,
         }),
 
@@ -80,7 +80,7 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
             id: 'bargraph-text-layer',
             data: barData,
             characterSet: charset,
-            getPosition: (d: BarData) => [d.longitude, d.latitude],
+            getPosition: (d: BarData) => d.position,
             getPixelOffset: () => [0, titlePositionOffset],
             fontFamily: 'Noto Sans JP',
             getSize: 32,
@@ -96,6 +96,7 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
 
     const columnDataMap = barData
         .flatMap( d => {
+            const numOfBar = d.data.length
             return d.data.map((vdata, index) => {
                 return {
                     index,
@@ -105,8 +106,7 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
                     value: vdata.value,
                     color: vdata.color,
                     label: vdata.label,
-                    longitude: d.longitude,
-                    latitude: d.latitude,
+                    position: d.position
                 };
             });
         })
@@ -133,7 +133,7 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
             offset: [2.5*index-2.5, 0],
             radius: width * widthRatio,
             elevationScale: heightRatio,
-            getPosition: (d: any) => [d.longitude, d.latitude],
+            getPosition: (d: any) => d.position,
             getFillColor: (d: any) => {
                 return d.color
             },
