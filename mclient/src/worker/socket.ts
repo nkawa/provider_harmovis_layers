@@ -34,20 +34,16 @@ const toArrayColor = (color: number) => {
 	]
 }
 
-const getColor = (index: number) => {
-    let red = 0;
-    let green = 0;
-    let blue = 0;
-    index++;
-    const ratio = Math.floor(index/3);
-    if (index%3 === 0) {
-        green = 0xff - 0x11 * ratio;
-    } else if (index%3 === 1) {
-        blue = 0xff - 0x11 * ratio;
-    } else {
-        red = 0xff - 0x11 * ratio;
+const createGradientColorGenerator = (min:number, max:number) => {
+    const baseblue = 255;
+    const basered = 0;
+    const ratio = 255/(max-min)
+    return (value: number) => {
+        const v = value > max ? max : value < min ? min : value
+        let blue = baseblue - ratio*(v - min)
+        let red = basered + ratio*(v - min)
+        return [Math.floor(red),  0, Math.floor(blue)]
     }
-    return [red, green, blue]
 }
 
 const getData = (bar: any) => {
@@ -55,6 +51,8 @@ const getData = (bar: any) => {
     const barType = bar.type;
     const isFixColor = barType === 0 || barType === 2;
     const isHexa = barType === 2 || barType === 3;
+    const colorGenerator = createGradientColorGenerator(bar.min, bar.max)
+    console.log('time is ' + time)
     return {
         id: bar.id,
         movesbaseidx: bar.id,
@@ -72,7 +70,7 @@ const getData = (bar: any) => {
             const color = b.color;
             return {
                 value: b.value,
-                color: isFixColor ? getColor(index) : toArrayColor(color),
+                color: isFixColor ? toArrayColor(color): colorGenerator(b.value),
                 label: b.label,
             }
         }),

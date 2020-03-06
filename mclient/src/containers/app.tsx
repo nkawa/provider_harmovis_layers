@@ -1,7 +1,7 @@
 import React from 'react'
 import {
 	Container, connectToHarmowareVis, HarmoVisLayers, MovesLayer, MovesInput,
-	LoadingIcon, FpsDisplay, DepotsLayer, EventInfo, MovesbaseOperation, BasedProps
+	LoadingIcon, FpsDisplay, DepotsLayer, EventInfo, MovesbaseOperation, BasedProps, Movesbase
 } from 'harmoware-vis'
 import { GeoJsonLayer, LineLayer } from 'deck.gl'
 import Controller from '../components/controller'
@@ -106,14 +106,12 @@ class App extends Container<any, any> {
 	getBargraph (data: any) {
 		const { actions, movesbase } = this.props
 		const bars = data;
-		let  setMovesbase = []
-		for (let i = 0, len = bars.length; i < len; i++) {
-			const barData = bars[i];
-			const base = movesbase.find((m: any)=> m.id === barData.id)
+		let  setMovesbase = [...movesbase]
+		
+		for (const barData of bars) {
+			const base = (setMovesbase as Movesbase[]).find((m: any)=> m.id === barData.id)
 			if (base) {
-				base.arrivaltime = barData.elapsedtime
 				base.operation.push(barData)
-				setMovesbase.push(base)
 			} else {
 				setMovesbase.push({
 					mtype: 0,
@@ -121,7 +119,7 @@ class App extends Container<any, any> {
 					departuretime: barData.elapsedtime,
 					arrivaltime: barData.elapsedtime,
 					operation: [barData]
-				})
+				} as Movesbase)
 			}
 			this._updateBalloonInfo(barData);
 		}
@@ -212,7 +210,7 @@ class App extends Container<any, any> {
 
 	render () {
 		const props = this.props
-		const { actions, viewport, titlePosOffset, movedData, widthRatio, heightRatio, radiusRatio,  lightSettings, 
+		const { actions, viewport, settime, titlePosOffset, movedData, widthRatio, heightRatio, radiusRatio,  lightSettings, 
 			showTitle, infoBalloonList, enabledHeatmap, selectedType, gridSize, gridHeight, routePaths, movesbase, clickedObject,
 		} = props
 		const onHover = (el: any) => {
@@ -231,9 +229,12 @@ class App extends Container<any, any> {
 		}
 		let layers = []
 
+		
 		layers.push(new BarLayer({
 			id: 'bar-layer',
 			data: movedData,
+			movesbase: movesbase,
+			currentTime: settime,
 			widthRatio,
 			heightRatio,
 			radiusRatio,
@@ -299,8 +300,7 @@ class App extends Container<any, any> {
 					optionVisible: this.state.moveOptionVisible,
 					layerRadiusScale: 0.03,
 					layerOpacity: 0.8,
-					getStrokeWidth: 0.1,
-					getColor : () => [0,200,20],
+					getRouteWidth: () => 0.1,
 					optionCellSize: 2,
 					sizeScale: 20,
 					iconChange: false,
@@ -398,7 +398,7 @@ class App extends Container<any, any> {
 			const newInfo: BalloonInfo = {
 				id: data.id as string,
 				titleColor: [0xff, 0xff, 0xff],
-				position: data.position,
+				position: data.position?? [],
 				title: data.text,
 				items: data.data.map((item): BalloonItem => ({
 					text: (item.label+' : '+item.value),
