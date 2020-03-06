@@ -1,13 +1,16 @@
 import { LayerProps, CompositeLayer, ColumnLayer, ScatterplotLayer, TextLayer } from 'deck.gl'
-import { MovedData } from 'harmoware-vis'
+import { MovedData, Movesbase } from 'harmoware-vis'
 import { Layer } from '@deck.gl/core';
 import { BarData } from '../constants/bargraph';
+import { analyzeMovesBase } from 'harmoware-vis/lib/src/library';
 
 interface BarLayerProps extends LayerProps {
     data: MovedData[];
+    movesbase: Movesbase[];
     widthRatio: number;
     heightRatio: number;
     radiusRatio: number;
+    currentTime: number;
     titlePositionOffset: number;
     showTitle: boolean;
     selectBarGraph: (barId: BarData|null) => void; 
@@ -24,9 +27,12 @@ const extractCharCode = (data: BarData[]) => {
     const charSet: string[] = []
     data.forEach((d) => {
         const text = d.text;
-        for (let i = 0; i < text.length; i++) {
-            charSet.push(text[i])
+        if (text) {
+            for (let i = 0; i < text.length; i++) {
+                charSet.push(text[i])
+            }
         }
+
     })
     return charSet;
 }
@@ -52,9 +58,22 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
   }
 
   renderLayers () {
-    const { data, showTitle, visible, heightRatio, widthRatio, radiusRatio, titlePositionOffset } = this.props
+    const { data, currentTime, showTitle, visible, movesbase, heightRatio, widthRatio, radiusRatio, titlePositionOffset } = this.props
     const barData = data.filter((b) => isBarData(b)) as BarData[]
+    movesbase.forEach((base) => {
+        const isExist = barData.some((data) => data.id === (base as any).id)
+        if (!isExist) {
+            const index = currentTime > (base.departuretime as number) ?
+                base.operation.length -1:
+                0;
+            const tempData = base.operation[index] as BarData
+            if (isBarData(tempData)) {
+                barData.push(tempData)
+            }
+        }
+    })
     const charset = extractCharCode(barData)
+
     const layers = [
         new ScatterplotLayer({
             id: 'bargraph-scatterplot-layer',
