@@ -115,10 +115,21 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
 
     const columnDataMap = barData
         .flatMap( d => {
+            const step = 2.5
             const numOfBar = d.data.length
+            const isEven = numOfBar%2 === 0;
+            const calcOffset = (index: number) => {
+                const half = Math.floor(numOfBar/2)
+                if (isEven) {
+                    const evenOffset = index*step - half*step + step/2
+                    return evenOffset
+                } else {
+                    return index*step - half*step
+                }
+            } 
             return d.data.map((vdata, index) => {
                 return {
-                    index,
+                    offset: calcOffset(index),
                     name: d.text,
                     shapeType: d.shapeType,
                     width: d.width,
@@ -130,7 +141,7 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
             });
         })
         .reduce((prev, data) => {
-            const key = data.index+'_'+data.shapeType+'_'+data.width
+            const key = data.offset+'_'+data.shapeType+'_'+data.width
             const prevData = prev[key]
             if (prevData) {
                 prevData.push(data)
@@ -142,14 +153,14 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
     const columnlayers = Object.values(columnDataMap).map((column: any) => {
         const shapeType = column[0].shapeType;
         const width = column[0].width;
-        const index = column[0].index;
+        const offset = column[0].offset;
         return new ColumnLayer({
-            id: 'grid-cell-layer-' + index + shapeType +window,
+            id: 'grid-cell-layer-' + offset + shapeType +window,
             data: column,
             extruded: true,
             pickable: true,
             diskResolution: shapeType,
-            offset: [2.5*index-2.5, 0],
+            offset: [offset, 0],
             radius: width * widthRatio,
             elevationScale: heightRatio,
             getPosition: (d: any) => d.position,

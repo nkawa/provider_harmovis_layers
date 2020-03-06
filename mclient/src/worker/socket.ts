@@ -34,15 +34,17 @@ const toArrayColor = (color: number) => {
 	]
 }
 
-const createGradientColorGenerator = (min:number, max:number) => {
-    const baseblue = 255;
-    const basered = 0;
+const createGradientColorGenerator = (minValue:number|undefined, maxValue:number|undefined) => {
+    const min = minValue ?? 0
+    const max = maxValue ?? 0
+    const basegreen = 0;
+    const basered = 255;
     const ratio = 255/(max-min)
-    return (value: number) => {
-        const v = value > max ? max : value < min ? min : value
-        let blue = baseblue - ratio*(v - min)
-        let red = basered + ratio*(v - min)
-        return [Math.floor(red),  0, Math.floor(blue)]
+    return (value: number|undefined) => {
+        const v = value ? (value > max ? max : (value < min ? min : value)) : 0
+        let green = basegreen + ratio*(v - min)
+        let red = basered - ratio*(v - min)
+        return [Math.floor(red),  Math.floor(green), 0]
     }
 }
 
