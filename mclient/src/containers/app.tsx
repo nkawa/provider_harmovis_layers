@@ -11,10 +11,11 @@ import BarGraphInfoCard from '../components/BarGraphInfoCard'
 import { selectBarGraph, removeBallonInfo, appendBallonInfo, updateBallonInfo } from '../actions/actions'
 import store from '../store'
 import { BarData } from '../constants/bargraph'
-import HeatmapLayer from './HeatmapLayer'
+//import HeatmapLayer from './HeatmapLayer'
 import InfomationBalloonLayer from './InfomationBalloonLayer'
 import { BalloonInfo, BalloonItem } from '../constants/informationBalloon'
 
+console.log("New OK %d",1)
 
 class App extends Container<any, any> {
 
@@ -44,7 +45,7 @@ class App extends Container<any, any> {
 			moveDataVisible: true,
 			moveOptionVisible: false,
 			depotOptionVisible: false,
-			heatmapVisible: false,
+		    heatmapVisible: false,
 			optionChange: false,
 			mapbox_token: '',
 			geojson: null,
@@ -218,7 +219,7 @@ class App extends Container<any, any> {
 	render () {
 		const props = this.props
 		const { actions, viewport, settime, titlePosOffset, movedData, widthRatio, heightRatio, radiusRatio,  lightSettings, 
-			showTitle, infoBalloonList, enabledHeatmap, selectedType, gridSize, gridHeight, routePaths, movesbase, clickedObject,
+			showTitle, infoBalloonList, selectedType, gridSize, gridHeight, routePaths, movesbase, clickedObject, titleSize,
 		} = props
 		const onHover = (el: any) => {
 			if (el && el.object) {
@@ -246,7 +247,8 @@ class App extends Container<any, any> {
 			heightRatio,
 			radiusRatio,
 			selectBarGraph: this._selectBarGraph,
-			titlePositionOffset: titlePosOffset,
+		    titlePositionOffset: titlePosOffset,
+			titleSize,		    
 			showTitle, 
 		}))
 		layers.push(new InfomationBalloonLayer({
@@ -276,7 +278,7 @@ class App extends Container<any, any> {
 		}
 
 		const onViewportChange = this.props.onViewportChange || actions.setViewport
-		const {viewState} = this.state
+	    const {viewState} = this.state
 
 		// wait until mapbox_token is given from harmo-vis provider.
 
@@ -316,7 +318,7 @@ class App extends Container<any, any> {
 				}) as any
 			)
 		}
-		if (enabledHeatmap) {
+/*	    if (false){
 			layers.push(
 				new HeatmapLayer({
 					visible: enabledHeatmap,
@@ -328,6 +330,7 @@ class App extends Container<any, any> {
 				  })
 			)
 		}
+*/
 		const visLayer =
 			(this.state.mapbox_token.length > 0) ?
 				<HarmoVisLayers 
