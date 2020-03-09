@@ -12,6 +12,7 @@ interface BarLayerProps extends LayerProps {
     radiusRatio: number;
     currentTime: number;
     titlePositionOffset: number;
+    titleSize: number;    
     showTitle: boolean;
     selectBarGraph: (barId: BarData|null) => void; 
 }
@@ -58,7 +59,7 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
   }
 
   renderLayers () {
-    const { data, currentTime, showTitle, visible, movesbase, heightRatio, widthRatio, radiusRatio, titlePositionOffset } = this.props
+      const { data, currentTime, showTitle, visible, movesbase, heightRatio, widthRatio, radiusRatio, titlePositionOffset,titleSize } = this.props
     const barData = data.filter((b) => isBarData(b)) as BarData[]
     movesbase.forEach((base) => {
         const isExist = barData.some((data) => data.id === (base as any).id)
@@ -102,7 +103,7 @@ export default class BarLayer extends CompositeLayer<BarLayerProps> {
             getPosition: (d: BarData) => d.position,
             getPixelOffset: () => [0, titlePositionOffset],
             fontFamily: 'Noto Sans JP',
-            getSize: 32,
+            getSize: titleSize,
             getColor: [255,255,255],
             getTextAnchor: 'middle',
             getAlignmentBaseline: 'top',

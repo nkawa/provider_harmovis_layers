@@ -22,6 +22,7 @@ export const changeBarRadius = actionCreator<number>('CHANGE_BAR_RADIUS')
 export const selectBarGraph = actionCreator<BarData|null>('SELECT_BAR_GRAPH')
 export const showBarTitle = actionCreator<boolean>('SHOW_BAR_TITLE')
 export const changeBarTitlePosOffset = actionCreator<number>('CHANGE_TITLE_POS_OFFSET')
+export const changeBarTitleSize = actionCreator<number>('CHANGE_TITLE_SIZE')
 
 // balloon
 export const appendBallonInfo = actionCreator<BalloonInfo>('APPEND_BALLOON_INFO');
