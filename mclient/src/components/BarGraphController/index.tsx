@@ -21,7 +21,7 @@ export default function BargraphController() {
                   グラフの幅(倍率): <BarWidth />
                 </li>
                 <li>
-                  タイトルの表示: <ShowTitle />
+                  タイトル表示・サイズ: <ShowTitle /> 
                 </li>
                 <li>
                   タイトルのオフセット(px): <TitleOffset />

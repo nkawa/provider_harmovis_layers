@@ -161,7 +161,8 @@ export default class Controller extends React.Component<ControllerProps, ContSta
                   <ForwardButton actions={actions} className='btn btn-outline-light btn-sm w-100' /> :
                   <ReverseButton actions={actions} className='btn btn-outline-light btn-sm w-100' />
                 }
-              </div>
+        </div>
+	    {/*
               <div className='btn-group d-flex' role='group'>
                 <AddMinutesButton addMinutes={-5} actions={actions} className='btn btn-outline-light btn-sm w-100' />
                 <AddMinutesButton addMinutes={-1} actions={actions} className='btn btn-outline-light btn-sm w-100' />
@@ -170,6 +171,7 @@ export default class Controller extends React.Component<ControllerProps, ContSta
                 <AddMinutesButton addMinutes={1} actions={actions} className='btn btn-outline-light btn-sm w-100' />
                 <AddMinutesButton addMinutes={5} actions={actions} className='btn btn-outline-light btn-sm w-100' />
               </div>
+	     */}
             </li>
             <li>
               再現中日時&nbsp;<SimulationDateTime settime={settime} />
@@ -182,7 +184,7 @@ export default class Controller extends React.Component<ControllerProps, ContSta
               <label htmlFor='SpeedRange'>スピード<SpeedValue secperhour={secperhour} actions={actions} />秒/時</label>
               <SpeedRange secperhour={secperhour} actions={actions} id='SpeedRange' className='form-control-range' />
             </li>
-            <li><div>移動データ操作0</div>
+            <li><div>移動データ操作</div>
               <div className='btn-group d-flex' role='group'>
                 <button onClick={this.deleteMovebase.bind(this,0)} className='btn btn-outline-light btn-sm w-100'>
                   <span className='button_span'><Icon icon={icDelete} />&nbsp; 全移動データ削除</span>

@@ -15,8 +15,8 @@ export default class PolygonIconLayer extends CompositeLayer<HeatmapLayerProps> 
   static layerName = 'HeatmapLayer'
 
   renderLayers () {
-    const { movedData, type, size, height, visible, extruded } = this.props
-    if (type === GridType.Hexagon) {
+      const { movedData, type, size, height, visible, extruded } = this.props
+      if (type === GridType.Hexagon) {
       return [
         new HexagonLayer({
             visible,

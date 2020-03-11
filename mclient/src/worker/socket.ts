@@ -54,7 +54,7 @@ const getData = (bar: any) => {
     const isFixColor = barType === 0 || barType === 2;
     const isHexa = barType === 2 || barType === 3;
     const colorGenerator = createGradientColorGenerator(bar.min, bar.max)
-    console.log('time is ' + time)
+//    console.log('time is ' + time)
     return {
         id: bar.id,
         movesbaseidx: bar.id,
