@@ -210,9 +210,8 @@ class App extends Container<any, any> {
 
 	componentDidMount(){
 		super.componentDidMount();
-		const { setNoLoop, setAddSec } = this.props.actions
+		const { setNoLoop } = this.props.actions
 		setNoLoop(true);
-		setAddSec(10);
 	}
 
 	render () {
