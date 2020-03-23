@@ -257,10 +257,10 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 			mu.Unlock()
 		}
 	case "BarGraphs":
-		vs := &geo.BarGraphs{}
-		err := proto.Unmarshal(sp.Cdata.Entity, vs)
+		bargraphs := &geo.BarGraphs{}
+		err := proto.Unmarshal(sp.Cdata.Entity, bargraphs)
 		if err == nil {
-			jsonBytes, _ := json.Marshal(vs)
+			jsonBytes, _ := json.Marshal(bargraphs)
 			jsonStr := string(jsonBytes)
 			log.Printf("BarGraphs: %v", jsonStr)
 			mu.Lock()

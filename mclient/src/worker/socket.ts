@@ -52,9 +52,10 @@ const createGradientColorGenerator = (minValue:number|undefined, maxValue:number
 
 const getData = (bar: any) => {
     const time = bar.ts.seconds;
-    const barType = bar.type;
-    const isFixColor = barType === 0 || barType === 2;
-    const isHexa = barType === 2 || barType === 3;
+    const colorType = bar.colorType;
+    const shapeType = bar.shapeType;
+    const isVarColor = colorType === 1;
+    const isHexa = shapeType === 1;
     const colorGenerator = createGradientColorGenerator(bar.min, bar.max)
 //    console.log('time is ' + time)
     return {
@@ -70,11 +71,10 @@ const getData = (bar: any) => {
         speed: 0,
         shapeType: isHexa ? 6 : 4,
         areaColor: toArrayColor(bar.color),
-        data: bar.barData.map((b: any, index: number) => {
-            const color = b.color;
+        data: bar.barData.map((b: any) => {
             return {
                 value: b.value,
-                color: isFixColor ? toArrayColor(color): colorGenerator(b.value),
+                color: isVarColor ? toArrayColor(b.color) : colorGenerator(b.value),
                 label: b.label,
             }
         }),
