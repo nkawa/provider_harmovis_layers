@@ -13,7 +13,9 @@ import { BarData } from '../constants/bargraph'
 import InfomationBalloonLayer from './InfomationBalloonLayer'
 import { BalloonInfo, BalloonItem } from '../constants/informationBalloon'
 import { AgentData } from '../constants/agent'
-import { SocketMessage, isMapboxToken, isBarGraphMsg, isAgentMsg } from '../constants/workerMessageTypes'
+import { isMapboxToken, isBarGraphMsg, isAgentMsg } from '../constants/workerMessageTypes'
+import HeatmapLayer from './HeatmapLayer'
+import DateSlider from './DateSlider'
 
 console.log("New OK %d",1)
 
@@ -293,7 +295,7 @@ class App extends Container<any, any> {
 
 	render () {
 		const props = this.props
-		const { actions, viewport, settime, titlePosOffset, movedData, widthRatio, heightRatio, radiusRatio,  lightSettings, 
+		const { actions, enabledHeatmap, viewport, settime, titlePosOffset, movedData, widthRatio, heightRatio, radiusRatio,  lightSettings, 
 			showTitle, infoBalloonList, selectedType, gridSize, gridHeight, routePaths, movesbase, clickedObject, titleSize,
 		} = props
 		const onHover = (el: any) => {
@@ -393,7 +395,7 @@ class App extends Container<any, any> {
 				}) as any
 			)
 		}
-/*	    if (false){
+    if (false){
 			layers.push(
 				new HeatmapLayer({
 					visible: enabledHeatmap,
@@ -405,7 +407,6 @@ class App extends Container<any, any> {
 				  })
 			)
 		}
-*/
 		const visLayer =
 			(this.state.mapbox_token.length > 0) ?
 				<HarmoVisLayers 
@@ -441,6 +442,16 @@ class App extends Container<any, any> {
 					</g>
 				</svg>
 				<FpsDisplay />
+				<div style={{
+					width: '100%',
+					position: 'absolute',
+					bottom: 10
+				}}>
+					<DateSlider
+						settime={settime}
+						setCurrentTime={actions.setTime}
+					/>
+				</div>
 				{
 					this._renderBarGraphInfo()
 				}
