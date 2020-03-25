@@ -57,39 +57,39 @@ export default (state = initialState, action: Action): TimeLapseState => {
   }
   if (isType(action, actions.setRangeStartDate)) {
     const { payload } = action;
-    const { rangeStartDate, rangeEndDate, startDate, endDate } = state;
+    const { rangeStartDate, rangeEndDate, startDate, endDate, selectedStartDate, selectedEndDate } = state;
 
+    const newRangeStartDate = payload;
     if (
-      payload.getTime() < startDate.getTime() ||
-      payload.getTime() > rangeEndDate.getTime()
+      newRangeStartDate.getTime() < startDate.getTime() ||
+      newRangeStartDate.getTime() > rangeEndDate.getTime()
     ) {
       return state;
     }
     const deltaRange = (() => {
-      if (!rangeStartDate || !rangeEndDate) {
-        return defaultRange;
-      }
       return rangeEndDate.getTime() - rangeStartDate.getTime();
     })();
-    const deltaSelected = (() => {
-      if (!rangeStartDate || !rangeEndDate) {
-        return defaultRange;
-      }
-      return rangeEndDate.getTime() - rangeStartDate.getTime();
-    })();
-    let newRangeEndDate = new Date(payload.getTime() + deltaRange);
+
+    let newRangeEndDate = new Date(newRangeStartDate.getTime() + deltaRange);
     if (newRangeEndDate.getTime() > endDate.getTime()) {
       newRangeEndDate = endDate;
     }
-    let newSelectedEndDate = new Date(payload.getTime() + defaultDuration);
-    if (newSelectedEndDate.getTime() > newRangeEndDate.getTime()) {
-      newSelectedEndDate = newRangeEndDate;
+    const deltaSelected = (() => {
+      return selectedEndDate.getTime() - selectedStartDate.getTime();
+    })();
+    let newSelectedStartDate = selectedStartDate
+    if (newSelectedStartDate.getTime() < newRangeStartDate.getTime()) {
+      newSelectedStartDate = newRangeStartDate
     }
+    if (newSelectedStartDate.getTime() > newRangeEndDate.getTime() - deltaSelected) {
+      newSelectedStartDate = new Date(newRangeEndDate.getTime() - deltaSelected);
+    }
+    let newSelectedEndDate = new Date(newSelectedStartDate.getTime() + deltaSelected);
     return {
       ...state,
-      rangeStartDate: payload,
+      rangeStartDate: newRangeStartDate,
       rangeEndDate: newRangeEndDate,
-      selectedStartDate: payload,
+      selectedStartDate: newSelectedStartDate,
       selectedEndDate: newSelectedEndDate
     };
   }

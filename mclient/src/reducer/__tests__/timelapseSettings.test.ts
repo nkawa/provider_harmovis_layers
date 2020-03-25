@@ -3,24 +3,31 @@ import * as actions from '../../actions/timelapseActions';
 
 const validateTime = (state: TimeLapseState): boolean => {
   if (state.startDate.getTime() > state.endDate.getTime()) {
+    console.log('startDate > endData')
     return false;
   }
   if (state.rangeEndDate.getTime() > state.endDate.getTime()) {
+    console.log('rangeEndDate > endDate')
     return false;
   }
   if (state.rangeStartDate.getTime() > state.rangeEndDate.getTime()) {
+    console.log('rangeStartDate > rangeEndDate')
     return false;
   }
   if (state.startDate.getTime() > state.rangeStartDate.getTime()) {
+    console.log('startDate > rangeStartDate')
     return false;
   }
   if (state.selectedEndDate.getTime() > state.rangeEndDate.getTime()) {
+    console.log('selectedEndDate > rangeEndDate')
     return false;
   }
   if (state.selectedStartDate.getTime() > state.selectedEndDate.getTime()) {
+    console.log(`selectedStartDate${state.selectedStartDate.getTime()} > selectedEndDate ${state.selectedEndDate.getTime()}`)
     return false;
   }
   if (state.rangeStartDate.getTime() > state.selectedStartDate.getTime()) {
+    console.log('rangeStartDate > selectedEndDate')
     return false;
   }
   return true;
@@ -53,7 +60,7 @@ test('set bounded state', () => {
   expect(validateTime(state)).toBe(true);
 });
 
-test('set start rage date', () => {
+test('set start range date', () => {
   const st = setBoundedDate();
   const rangeStartDate = new Date(st.startDate.getTime() + 10);
   const state = timelapseSettings(
@@ -63,7 +70,7 @@ test('set start rage date', () => {
   expect(validateTime(state)).toBe(true);
   expect(rangeStartDate.getTime()).toEqual(state.rangeStartDate.getTime());
 });
-test('can not set start rage date, range start date earlier than range end date', () => {
+test('can not set start range date, range start date earlier than range end date', () => {
   const st = setBoundedDate();
   const rangeStartDate = new Date(st.startDate.getTime() - 100);
   const state = timelapseSettings(
