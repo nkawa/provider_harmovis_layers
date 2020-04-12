@@ -4,6 +4,7 @@ import heatmapSettings from './reducer/heatmapSettings'
 import barGraphSettings from './reducer/barGraphSettings'
 import createSagaMiddleware from 'redux-saga'
 import informationBalloon from './reducer/informationBalloon'
+import timelapseSettings from './reducer/timelapseSettings'
 
 const saga = createSagaMiddleware()
 
@@ -12,6 +13,7 @@ const store = createStore(
   heatmapSettings,
   barGraphSettings,
   informationBalloon,
+  timelapseSettings
 }),
 	applyMiddleware(saga)
 )

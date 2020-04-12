@@ -1,6 +1,7 @@
 import io from 'socket.io-client';
-import { SocketMsgTypes } from '../constants/workerMessageTypes'
 import { BarData } from '../constants/bargraph';
+import { AgentData } from '../constants/agent';
+import { SocketMessage } from '../constants/workerMessageTypes';
 const socket = io();
 
 socket.on('disconnect', () => { console.log('Socket.IO disconnected!') })
@@ -9,19 +10,20 @@ self.addEventListener("message", (e: any) => {
     const type = e.data[0];
 });
 // start socket server
+
 socket.on('connect', () => {
     console.log('Socket.IO connected!')
-    worker.postMessage([SocketMsgTypes.CONNECTED]);
+    worker.postMessage({ type: 'CONNECTED'} as SocketMessage<void>);
     console.log('Get mapbox token')
     socket.emit('get_mapbox_token', {})
 })
 
-socket.on('mapbox_token', (token: string) => {
-    console.log('token Got:' + token)
-    worker.postMessage([
-        SocketMsgTypes.NOTIFY_MAPBOX_TOKEN,
-        token
-    ]);
+socket.on('mapbox_token', (payload: string) => {
+    console.log('token Got:' + payload)
+    worker.postMessage({
+        type: 'RECIVED_MAPBOX_TOKEN',
+        payload
+    } as SocketMessage<string> );
     startRecivedData();
 })
 
@@ -50,9 +52,10 @@ const createGradientColorGenerator = (minValue:number|undefined, maxValue:number
 
 const getData = (bar: any) => {
     const time = bar.ts.seconds;
-    const barType = bar.type;
-    const isFixColor = barType === 0 || barType === 2;
-    const isHexa = barType === 2 || barType === 3;
+    const colorType = bar.colorType;
+    const shapeType = bar.shapeType;
+    const isVarColor = colorType === 1;
+    const isHexa = shapeType === 1;
     const colorGenerator = createGradientColorGenerator(bar.min, bar.max)
 //    console.log('time is ' + time)
     return {
@@ -68,11 +71,10 @@ const getData = (bar: any) => {
         speed: 0,
         shapeType: isHexa ? 6 : 4,
         areaColor: toArrayColor(bar.color),
-        data: bar.barData.map((b: any, index: number) => {
-            const color = b.color;
+        data: bar.barData.map((b: any) => {
             return {
                 value: b.value,
-                color: isFixColor ? toArrayColor(color): colorGenerator(b.value),
+                color: isVarColor ? toArrayColor(b.color) : colorGenerator(b.value),
                 label: b.label,
             }
         }),
@@ -88,7 +90,17 @@ function startRecivedData() {
     socket.on('bargraphs', (str: string) => {
         const rawData = JSON.parse(str);
         const bars = rawData.bars;     
-        const data = bars.map((b: any) => getData(b));
-        worker.postMessage([SocketMsgTypes.RECIVED_BAR_GRAPHS, data])
+        const payload: BarData[] = bars.map((b: any) => getData(b));
+        worker.postMessage({
+            type: 'RECIVED_BAR_GRAPHS',  
+            payload
+        } as SocketMessage<BarData[]>)
+    })
+    socket.on('agents', (str: string) => {
+        const payload: AgentData = JSON.parse(str);
+        worker.postMessage({
+            type: 'RECIVED_AGENT',
+            payload
+        } as SocketMessage<AgentData>)
     })
 }

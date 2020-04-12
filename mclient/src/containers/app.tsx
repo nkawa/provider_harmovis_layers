@@ -1,19 +1,21 @@
 import React from 'react'
 import {
-	Container, connectToHarmowareVis, HarmoVisLayers, MovesLayer, MovesInput,
-	LoadingIcon, FpsDisplay, DepotsLayer, EventInfo, MovesbaseOperation, BasedProps, Movesbase
+	Container, connectToHarmowareVis, HarmoVisLayers, MovesLayer,
+	LoadingIcon, FpsDisplay, Movesbase
 } from 'harmoware-vis'
 import { GeoJsonLayer, LineLayer } from 'deck.gl'
 import Controller from '../components/controller'
-import { SocketMsgTypes } from '../constants/workerMessageTypes'
 import BarLayer from './BarLayer'
 import BarGraphInfoCard from '../components/BarGraphInfoCard'
 import { selectBarGraph, removeBallonInfo, appendBallonInfo, updateBallonInfo } from '../actions/actions'
 import store from '../store'
 import { BarData } from '../constants/bargraph'
-//import HeatmapLayer from './HeatmapLayer'
 import InfomationBalloonLayer from './InfomationBalloonLayer'
 import { BalloonInfo, BalloonItem } from '../constants/informationBalloon'
+import { AgentData } from '../constants/agent'
+import { isMapboxToken, isBarGraphMsg, isAgentMsg } from '../constants/workerMessageTypes'
+import HeatmapLayer from './HeatmapLayer'
+import DateSlider from './DateSlider'
 
 console.log("New OK %d",1)
 
@@ -26,16 +28,18 @@ class App extends Container<any, any> {
 		const { setSecPerHour, setLeading, setTrailing } = props.actions
 		const worker = new Worker('socketWorker.js');
 		const self = this;
-		worker.onmessage = e => {
-			const type = e.data[0];
-			if(type === SocketMsgTypes.NOTIFY_MAPBOX_TOKEN) {
+		worker.onmessage = (e) => {
+			const msg = e.data;
+			if(isMapboxToken(msg)) {
 				this.setState({
-					mapbox_token: e.data[1]
+					mapbox_token: msg.payload
 				});
-			} else if (type === SocketMsgTypes.CONNECTED) {
+			} else if (msg.type === 'CONNECTED') {
 				console.log('connected')
-			} else if (type === SocketMsgTypes.RECIVED_BAR_GRAPHS) {
-				self.getBargraph(e.data[1])
+			} else if (isBarGraphMsg(msg)) {
+				self.getBargraph(msg.payload)
+			} else if (isAgentMsg(msg)) {
+				self.getAgents(msg.payload)
 			}
 		};
 		setSecPerHour(3600)
@@ -62,11 +66,8 @@ class App extends Container<any, any> {
 			linecolor: [0,155,155],
 			popup: [0, 0, '']
 		}
-
 		this._onViewStateChange = this._onViewStateChange.bind(this)
-
 		// for receiving event info.
-
 	}
 
 	bin2String (array: any) {
@@ -104,6 +105,45 @@ class App extends Container<any, any> {
 		}
 	}
 
+		getAgents (dt: AgentData) {
+			const { actions, movesbase } = this.props
+			const agents = dt.dt.agents
+			const time = dt.ts // set time as now. (If data have time, ..)
+			let  setMovesbase = []
+
+			if (movesbase.length == 0) {
+				for (let i = 0, len = agents.length; i < len; i++) {
+					setMovesbase.push({
+						mtype: 0,
+						id: i,
+						operation: [{
+							elapsedtime: time,
+							position: [agents[i].point[0], agents[i].point[1], 0],
+							angle: 0,
+							speed: 0.5,
+							color: [100,100,0]
+						}]
+					})
+				}
+
+			} else {
+				for (let i = 0;  i < movesbase.length; i ++) {
+					console.log('update ' + agents[i].point)
+					movesbase[i].arrivaltime = time
+					movesbase[i].operation.push({
+						elapsedtime: time,
+						position: [agents[i].point[0], agents[i].point[1], 0],
+						angle: 0,
+						color: [100,100,0],
+						speed: 0.5
+					})
+				}
+				setMovesbase = movesbase
+			}
+
+			actions.updateMovesBase(setMovesbase)
+	}
+
 	getBargraph (data: any) {
 		const { actions, movesbase } = this.props
 		const bars = data;
@@ -128,6 +168,44 @@ class App extends Container<any, any> {
 	}
 
 	getEvent (socketData:any) {
+		const { actions, movesbase } = this.props
+		const { mtype, id, lat, lon, angle, speed } = JSON.parse(socketData)
+		// 	console.log("dt:",mtype,id,time,lat,lon,angle,speed, socketData);
+		const time = Date.now() / 1000 // set time as now. (If data have time, ..)
+		let hit = false
+		const movesbasedata = [...movesbase] // why copy !?
+		const setMovesbase = []
+
+		for (let i = 0, lengthi = movesbasedata.length; i < lengthi; i += 1) {
+			// 	    let setMovedata = Object.assign({}, movesbasedata[i]);
+			let setMovedata = movesbasedata[i]
+			if (mtype === setMovedata.mtype && id === setMovedata.id) {
+				hit = true
+				// 		const {operation } = setMovedata;
+				// 		const arrivaltime = time;
+				setMovedata.arrivaltime = time
+				setMovedata.operation.push({
+					elapsedtime: time,
+					position: [lon, lat, 0],
+					angle, speed
+				})
+				// 		setMovedata = Object.assign({}, setMovedata, {arrivaltime, operation});
+			}
+			setMovesbase.push(setMovedata)
+		}
+		if (!hit) {
+			setMovesbase.push({
+				mtype, id,
+				departuretime: time,
+				arrivaltime: time,
+				operation: [{
+					elapsedtime: time,
+					position: [lon, lat, 0],
+					angle, speed
+				}]
+			})
+		}
+		actions.updateMovesBase(setMovesbase)
 	}
 
 	deleteMovebase (maxKeepSecond: any) {
@@ -211,14 +289,13 @@ class App extends Container<any, any> {
 
 	componentDidMount(){
 		super.componentDidMount();
-		const { setNoLoop, setAddSec } = this.props.actions
+		const { setNoLoop } = this.props.actions
 		setNoLoop(true);
-		setAddSec(10);
 	}
 
 	render () {
 		const props = this.props
-		const { actions, viewport, settime, titlePosOffset, movedData, widthRatio, heightRatio, radiusRatio,  lightSettings, 
+		const { actions, enabledHeatmap, viewport, settime, titlePosOffset, movedData, widthRatio, heightRatio, radiusRatio,  lightSettings, 
 			showTitle, infoBalloonList, selectedType, gridSize, gridHeight, routePaths, movesbase, clickedObject, titleSize,
 		} = props
 		const onHover = (el: any) => {
@@ -318,7 +395,7 @@ class App extends Container<any, any> {
 				}) as any
 			)
 		}
-/*	    if (false){
+    if (false){
 			layers.push(
 				new HeatmapLayer({
 					visible: enabledHeatmap,
@@ -330,7 +407,6 @@ class App extends Container<any, any> {
 				  })
 			)
 		}
-*/
 		const visLayer =
 			(this.state.mapbox_token.length > 0) ?
 				<HarmoVisLayers 
@@ -366,6 +442,16 @@ class App extends Container<any, any> {
 					</g>
 				</svg>
 				<FpsDisplay />
+				<div style={{
+					width: '100%',
+					position: 'absolute',
+					bottom: 10
+				}}>
+					<DateSlider
+						settime={settime}
+						setCurrentTime={actions.setTime}
+					/>
+				</div>
 				{
 					this._renderBarGraphInfo()
 				}

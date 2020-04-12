@@ -1,5 +1,6 @@
 const resolve = require('path').resolve;
 const webpack = require('webpack');
+const CopyPlugin = require('copy-webpack-plugin');
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 
 module.exports = {
@@ -51,6 +52,7 @@ module.exports = {
 	    {
 			test: /\.css$/,
 			use: [
+					"style-loader", 
 			    'css-loader', // translates CSS into CommonJS
 			    'sass-loader' // compiles Sass to CSS, using Node Sass by default
 			]
@@ -65,7 +67,11 @@ module.exports = {
 	]
     },
     plugins: [
+		new CopyPlugin([
+			{ from: 'public', to: '.'}
+		]),
 		// for compiling cache(speed up)
+		new HardSourceWebpackPlugin(),
 		// Optional: Enables reading mapbox token from environment variable
 //		new webpack.EnvironmentPlugin(['MAPBOX_ACCESS_TOKEN'])
 	],
