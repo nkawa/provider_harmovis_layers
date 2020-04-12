@@ -68,6 +68,18 @@ class App extends Container<any, any> {
 		}
 		this._onViewStateChange = this._onViewStateChange.bind(this)
 		// for receiving event info.
+		/*
+		socket.on('event', this.getEvent.bind(this))
+		socket.on('geojson', this.getGeoJson.bind(this))
+		socket.on('lines', this.getLines.bind(this))
+		socket.on('agents', this.getAgents.bind(this))
+		socket.on('viewstate', this.getViewState.bind(this))
+		socket.on('pitch', this.getPitch.bind(this))
+		socket.on('bearing', this.getBearing.bind(this))
+		socket.on('clearMoves', this.getClearMoves.bind(this))
+
+		*/
+
 	}
 
 	bin2String (array: any) {
@@ -77,15 +89,34 @@ class App extends Container<any, any> {
 	getGeoJson (data: string) {
 		this.setState({ geojson: JSON.parse(data) })
 	}
+	getClearMoves (data :any) {
+		console.log('GetClearMoves:' + data)
+		this.deleteMovebase(0)
+	}
+
+	getBearing (data :any) {
+		console.log('Bearing:' + data)
+		console.log(this.props.actions)
+		this.props.actions.setViewport({bearing:data.bearing})	
+	}
+	getPitch (data :any) {
+		console.log('Pitch:' + data)
+		const pitch = data.pitch
+		this.props.actions.setViewport({pitch})	
+	}
 
 	getViewState (data: any) {
 		let vs = JSON.parse(data)
+		console.log('vs:',vs)
+		if (vs.pitch == undefined){
+			vs.pitch = 0.0
+		}
 		this.setState({
 			viewState: {
 				latitude: vs.lat,
 				longitude: vs.lon,
-				zoom: vs.zoom
-// 				pitch: vs.Pitch
+				zoom: vs.zoom,
+				pitch: vs.pitch
 			}
 		})
 
@@ -447,10 +478,12 @@ class App extends Container<any, any> {
 					position: 'absolute',
 					bottom: 10
 				}}>
-					<DateSlider
+{/*					<DateSlider
 						settime={settime}
 						setCurrentTime={actions.setTime}
 					/>
+			*/}
+
 				</div>
 				{
 					this._renderBarGraphInfo()

@@ -36,6 +36,7 @@ var (
 	assetsDir       http.FileSystem
 	ioserv          *gosocketio.Server
 	sxServerAddress string
+	mapboxToken     string
 )
 
 func toJSON(m map[string]interface{}, utime int64) string {
@@ -141,7 +142,7 @@ func run_server() *gosocketio.Server {
 	})
 
 	server.On("get_mapbox_token", func(c *gosocketio.Channel) {
-		mapboxToken := os.Getenv("MAPBOX_ACCESS_TOKEN")
+		mapboxToken = os.Getenv("MAPBOX_ACCESS_TOKEN")
 		if *mapbox != "" {
 			mapboxToken = *mapbox
 		}
@@ -253,9 +254,12 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 			log.Printf("ViewState: %v", string(jsonBytes))
 
 			mu.Lock()
+			ioserv.BroadcastToAll("mapbox_token", mapboxToken)
+
 			ioserv.BroadcastToAll("viewstate", string(jsonBytes))
 			mu.Unlock()
 		}
+
 	case "BarGraphs":
 		bargraphs := &geo.BarGraphs{}
 		err := proto.Unmarshal(sp.Cdata.Entity, bargraphs)
@@ -265,6 +269,39 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 			log.Printf("BarGraphs: %v", jsonStr)
 			mu.Lock()
 			ioserv.BroadcastToAll("bargraphs", jsonStr)
+
+		}
+	case "ClearMoves":
+		cms := &geo.ClearMoves{}
+		err := proto.Unmarshal(sp.Cdata.Entity, cms)
+		if err == nil {
+			jsonBytes, _ := json.Marshal(cms)
+			log.Printf("ClearMoves: %v", string(jsonBytes))
+
+			mu.Lock()
+			ioserv.BroadcastToAll("clearMoves", string(jsonBytes))
+			mu.Unlock()
+		}
+	case "Pitch":
+		cms := &geo.Pitch{}
+		err := proto.Unmarshal(sp.Cdata.Entity, cms)
+		if err == nil {
+			jsonBytes, _ := json.Marshal(cms)
+			log.Printf("Pitch: %v", string(jsonBytes))
+
+			mu.Lock()
+			ioserv.BroadcastToAll("pitch", string(jsonBytes))
+			mu.Unlock()
+		}
+	case "Bearing":
+		cms := &geo.Bearing{}
+		err := proto.Unmarshal(sp.Cdata.Entity, cms)
+		if err == nil {
+			jsonBytes, _ := json.Marshal(cms)
+			log.Printf("Bearing: %v", string(jsonBytes))
+
+			mu.Lock()
+			ioserv.BroadcastToAll("bearing", string(jsonBytes))
 			mu.Unlock()
 		}
 	}

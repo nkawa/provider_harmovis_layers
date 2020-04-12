@@ -27,6 +27,20 @@ socket.on('mapbox_token', (payload: string) => {
     startRecivedData();
 })
 
+socket.on('pitch', (payload: string) =>{
+    console.log('Picch:' + payload)
+//    worker.postMessage({
+//        type: 'RECIVED_MAPBOX_TOKEN',
+//        payload
+//    } as SocketMessage<string> );
+//    startRecivedData();/
+
+})
+
+//this.getPitch.bind(this))
+//socket.on('bearing', this.getBearing.bind(this))
+//socket.on('clearMoves', this.getClearMoves.bind(this))
+
 
 const toArrayColor = (color: number) => {
 	return [
